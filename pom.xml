@@ -10,7 +10,7 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <planetiler.version>0.8.3-SNAPSHOT</planetiler.version>
-    <junit.version>5.11.2</junit.version>
+    <junit.version>5.11.3</junit.version>
 
     <mainClass>org.openmaptiles.OpenMapTilesMain</mainClass>
     <image.version>${project.version}</image.version>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.commonmark</groupId>
       <artifactId>commonmark</artifactId>
-      <version>0.23.0</version>
+      <version>0.24.0</version>
     </dependency>
 
     <!-- To use test utilities: -->
@@ -104,12 +104,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.5.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.5.2</version>
       </plugin>
 
       <plugin>
@@ -229,7 +229,7 @@
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
-        <version>3.4.3</version>
+        <version>3.4.4</version>
         <configuration>
           <from>
             <image>
