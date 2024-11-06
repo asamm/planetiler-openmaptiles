@@ -20,4 +20,6 @@ target/
 .settings
 bin/
 
+# Working dirs
 data/
+_work/
