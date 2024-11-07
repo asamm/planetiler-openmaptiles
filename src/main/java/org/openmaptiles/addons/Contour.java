@@ -9,6 +9,8 @@ public class Contour implements Layer, OpenMapTilesProfile.OsmAllProcessor {
 
     public static String LAYER_NAME = "contour";
 
+    final double BUFFER_SIZE = 4.0;
+
     @Override
     public String name() {
         return LAYER_NAME;
@@ -21,7 +23,7 @@ public class Contour implements Layer, OpenMapTilesProfile.OsmAllProcessor {
             float ele = Float.parseFloat((String) feature.getTag("ele"));
 
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
-            feat.setBufferPixels(4);
+            feat.setBufferPixels(BUFFER_SIZE);
             feat.setAttrWithMinzoom("height", ele, 11);
             feat.setAttrWithMinzoom("nth_line", get_maptiler_nth_value(ele), 11);
         }

@@ -19,6 +19,10 @@ public class Hiking implements
     ForwardingProfile.OsmRelationPreprocessor,
     OpenMapTilesProfile.OsmAllProcessor {
 
+    final double BUFFER_SIZE = 4.0;
+
+    final String LAYER_NAME = "hiking";
+
     private record HikingRelation(
         long id,
         String route,
@@ -38,7 +42,7 @@ public class Hiking implements
 
     @Override
     public String name() {
-        return "hiking";
+        return LAYER_NAME;
     }
 
     @Override
@@ -61,7 +65,7 @@ public class Hiking implements
 
         if (feature.canBeLine() && feature.hasTag("route") && feature.getTag("route").equals("hiking")) {
             FeatureCollector.Feature feat = features.line("hiking")
-                .setBufferPixels(4)
+                .setBufferPixels(BUFFER_SIZE)
                 .setMinZoom(10);
             feature.tags().forEach((k, v) -> {
                 feat.setAttr(k, v);
