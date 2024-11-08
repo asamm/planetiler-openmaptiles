@@ -1929,7 +1929,7 @@ public class OpenMapTilesSchema {
     /** Complex mappings to generate attribute values from OSM element tags in the poi layer. */
     final class FieldMappings {
       public static final MultiExpression<String> Class = MultiExpression.of(List.of(
-        MultiExpression.entry("shop",
+          MultiExpression.entry("shop",
           matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
             "chemist", "chocolate", "coffee", "computer", "convenience", "confectionery", "copyshop", "cosmetics",
             "garden_centre", "doityourself", "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture",

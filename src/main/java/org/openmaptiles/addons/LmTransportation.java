@@ -31,10 +31,10 @@ public class LmTransportation implements Layer,
         if (feature.canBeLine() && IS_TRACK_EXPRESSION.evaluate(feature)) {
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setAttrWithMinzoom(Fields.CLASS, feature.getTag(Tags.HIGHWAY), 12);
-            feat.setAttrWithMinzoom(Fields.ACCESS, getAccess(feature.getTag(Tags.ACCESS)), 12);
-            feat.setAttrWithMinzoom(Fields.ONEWAY, getOneWay(feature.getTag(Tags.ONEWAY)), 12);
-            feat.setAttrWithMinzoom(Fields.TRACKTYPE, feature.getTag(Tags.TRACKTYPE), 12);
+            feat.setAttrWithMinzoom(Fields.CLASS, feature.getTag(OsmTags.HIGHWAY), 12);
+            feat.setAttrWithMinzoom(Fields.ACCESS, getAccess(feature.getTag(OsmTags.ACCESS)), 12);
+            feat.setAttrWithMinzoom(Fields.ONEWAY, getOneWay(feature.getTag(OsmTags.ONEWAY)), 12);
+            feat.setAttrWithMinzoom(Fields.TRACKTYPE, feature.getTag(OsmTags.TRACKTYPE), 12);
             feat.setAttrWithMinzoom(Fields.BRUNNEL, getBrunnel(feature), 12);
         }
     }
@@ -45,7 +45,8 @@ public class LmTransportation implements Layer,
      * @return value 'bridge', 'tunnel', 'ford' or null
      */
     private Object getBrunnel(SourceFeature feature) {
-        return Utils.brunnel(feature.getBoolean(Tags.BRIDGE), feature.getBoolean(Tags.TUNNEL),  feature.getBoolean(Tags.FORD));
+        return Utils.brunnel(feature.getBoolean(OsmTags.BRIDGE), feature.getBoolean(OsmTags.TUNNEL),  feature.getBoolean(
+            OsmTags.FORD));
     }
 
     /**

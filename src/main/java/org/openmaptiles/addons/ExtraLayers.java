@@ -16,7 +16,8 @@ public class ExtraLayers {
             // Create classes that extend Layer interface in the addons package, then instantiate them here
             new Hiking(),
             new Contour(),
-            new LmTransportation()
+            new LmTransportation(),
+            new Outdoor()
         );
     }
 }
