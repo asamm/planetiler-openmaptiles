@@ -1,10 +1,12 @@
-package org.openmaptiles.addons;
+package org.openmaptiles.addons.layers;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import java.util.Set;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
+import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.addons.OsmTags;
 import org.openmaptiles.util.Utils;
 
 public class LmTransportation implements Layer,

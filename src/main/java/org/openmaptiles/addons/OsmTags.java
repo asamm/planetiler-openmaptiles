@@ -4,7 +4,7 @@ package org.openmaptiles.addons;
  * Contains constants for OpenStreetMap (OSM) tags used in the project, 
  * including additional tags for the MapTiler Outdoor Schema.
  */
-final class OsmTags {
+final public class OsmTags {
 
     // Existing tags
     /** access: https://wiki.openstreetmap.org/wiki/Key:access */

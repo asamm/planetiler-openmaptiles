@@ -1,4 +1,4 @@
-package org.openmaptiles.addons;
+package org.openmaptiles.addons.layers;
 
 import static com.onthegomap.planetiler.util.MemoryEstimator.CLASS_HEADER_BYTES;
 import static com.onthegomap.planetiler.util.MemoryEstimator.POINTER_BYTES;

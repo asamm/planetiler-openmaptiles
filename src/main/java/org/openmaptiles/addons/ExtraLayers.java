@@ -5,6 +5,10 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import org.openmaptiles.Layer;
+import org.openmaptiles.addons.layers.Contour;
+import org.openmaptiles.addons.layers.Hiking;
+import org.openmaptiles.addons.layers.LmTransportation;
+import org.openmaptiles.addons.layers.OutdoorPoi;
 
 /**
  * Registry of extra custom layers that you can add to the openmaptiles schema.
@@ -17,7 +21,7 @@ public class ExtraLayers {
             new Hiking(),
             new Contour(),
             new LmTransportation(),
-            new Outdoor()
+            new OutdoorPoi(translations, config, stats)
         );
     }
 }

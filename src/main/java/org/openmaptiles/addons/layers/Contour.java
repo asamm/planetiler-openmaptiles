@@ -1,4 +1,4 @@
-package org.openmaptiles.addons;
+package org.openmaptiles.addons.layers;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.reader.SourceFeature;
