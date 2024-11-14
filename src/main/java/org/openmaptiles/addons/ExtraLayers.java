@@ -9,6 +9,7 @@ import org.openmaptiles.addons.layers.Contour;
 import org.openmaptiles.addons.layers.Hiking;
 import org.openmaptiles.addons.layers.LmTransportation;
 import org.openmaptiles.addons.layers.OutdoorPoi;
+import org.openmaptiles.addons.layers.Ski;
 
 /**
  * Registry of extra custom layers that you can add to the openmaptiles schema.
@@ -21,7 +22,8 @@ public class ExtraLayers {
             new Hiking(),
             new Contour(),
             new LmTransportation(),
-            new OutdoorPoi(translations, config, stats)
+            new OutdoorPoi(translations, config, stats),
+            new Ski(translations, config, stats)
         );
     }
 }

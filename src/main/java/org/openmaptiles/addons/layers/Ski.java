@@ -57,8 +57,31 @@ public class Ski implements Layer,
 
         String subClassValue = getSubClassValue(classValue, sourceFeature);
 
+        var feat = collector.anyGeometry(LAYER_NAME);
+
         // create a new feature in the outdoor layer as a point
-        // TODO
+        feat.setBufferPixels(BUFFER_SIZE);
+        feat.setAttr(LmOutdoorSchema.OutdoorPoiSchema.Fields.CLASS, classValue);
+        feat.setAttr(LmOutdoorSchema.OutdoorPoiSchema.Fields.SUBCLASS, subClassValue);
+        feat.putAttrs(OmtLanguageUtils.getNames(sourceFeature.tags(), translations));
+
+        // get original value of ref tag
+        feat.setAttr(Fields.REF, sourceFeature.getString("ref"));
+
+        // original value for piste:difficulty tag
+        feat.setAttr(Fields.DIFFICULTY, sourceFeature.getString("piste:difficulty"));
+
+        // original value for piste:grooming tag
+        feat.setAttr(Fields.GROOMING, sourceFeature.getString("piste:grooming"));
+
+        // original boolean value for lit tag or piste:lit tag if lit tag is not present
+        if (sourceFeature.hasTag("lit")) {
+            feat.setAttr(Fields.LIT, sourceFeature.getBoolean("lit"));
+        } else {
+            feat.setAttr(Fields.LIT, sourceFeature.getBoolean("piste:lit"));
+        }
+
+        feat.setMinZoom(getZoomLevel(classValue));
     }
 
     /**
@@ -80,5 +103,20 @@ public class Ski implements Layer,
         }
 
         return null;
+    }
+
+    private int getZoomLevel(String classValue) {
+
+        // switch case by classValue
+        switch (classValue) {
+            case "ski_resort":
+                return 10;
+            case "lift":
+                return 12;
+            case "downhill":
+                return 12;
+            default:
+                return 14;
+        }
     }
 }

@@ -100,6 +100,13 @@ public class LmOutdoorSchema {
 
     public interface OutdoorSkiSchema {
 
+        final class Fields extends SchemaFields {
+            public static final String REF = "ref";
+            public static final String DIFFICULTY = "difficulty";
+            public static final String GROOMING = "grooming";
+            public static final String LIT = "lit";
+        }
+
         MultiExpression<String> SKI_CLASS_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry("ski_resort", or(
                 Expression.matchAny("landuse", "winter_sports"), and(Expression.matchAny("leisure", "sports_centre"), Expression.matchAny("sport", "ski")))),
@@ -132,5 +139,6 @@ public class LmOutdoorSchema {
 
         // these classes have sub-classes that should be included in the output
         Set<String> CLASSES_WITH_SUBCLASSES = new HashSet<>(Set.of("lift", "avalanche"));
+
     }
 }
