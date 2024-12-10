@@ -3,73 +3,66 @@ package org.openmaptiles.addons.layers;
 import static com.onthegomap.planetiler.util.MemoryEstimator.CLASS_HEADER_BYTES;
 import static com.onthegomap.planetiler.util.MemoryEstimator.POINTER_BYTES;
 import static com.onthegomap.planetiler.util.MemoryEstimator.estimateSize;
+import static org.openmaptiles.util.Utils.brunnel;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.ForwardingProfile;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
+import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.MemoryEstimator;
+import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
+import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.generated.OpenMapTilesSchema;
+import org.openmaptiles.util.OmtLanguageUtils;
 
 public class Hiking implements
     Layer,
-    ForwardingProfile.OsmRelationPreprocessor,
-    OpenMapTilesProfile.OsmAllProcessor {
+    OpenMapTilesProfile.OsmAllProcessor ,
+    LmOutdoorSchema.OutdoorHikeSchema {
 
     final double BUFFER_SIZE = 4.0;
 
     final String LAYER_NAME = "hiking";
 
-    private record HikingRelation(
-        long id,
-        String route,
-        String network,
-        String name,
-        String ref,
-        String osmcSymbol
-    ) implements OsmRelationInfo {
+    private final MultiExpression.Index<String> highwayMapping;
 
-        @Override
-        public long estimateMemoryUsageBytes() {
-            return CLASS_HEADER_BYTES + MemoryEstimator.estimateSizeLong(id) + POINTER_BYTES + estimateSize(route) +
-                estimateSize(network) + POINTER_BYTES + estimateSize(name) + POINTER_BYTES + estimateSize(ref) +
-                POINTER_BYTES + estimateSize(osmcSymbol);
-        }
+    public Hiking(Translations translations,  PlanetilerConfig config, Stats stats) {
+
+        this.highwayMapping = LM_HIGHWAY_MAPPING.index();
     }
-
     @Override
     public String name() {
         return LAYER_NAME;
     }
 
     @Override
-    public List<OsmRelationInfo> preprocessOsmRelation(OsmElement.Relation relation) {
-        if (relation.hasTag("route") && relation.getTag("route").equals("hiking")) {
-            return List.of(new HikingRelation(
-                relation.id(),
-                relation.getString("route"),
-                relation.getString("network"),
-                relation.getString("name"),
-                relation.getString("ref"),
-                relation.getString("osmc:symbol")));
-        }
-        return null;
-    }
+    public void processAllOsm(SourceFeature sourceFeature, FeatureCollector collector) {
 
-    @Override
-    public void processAllOsm(SourceFeature feature, FeatureCollector features) {
-        var relationInfos = feature.relationInfo(HikingRelation.class);
+        if (sourceFeature.canBeLine() && IS_HIKE_EXPRESSION.evaluate(sourceFeature)) {
 
-        if (feature.canBeLine() && feature.hasTag("route") && feature.getTag("route").equals("hiking")) {
-            FeatureCollector.Feature feat = features.line("hiking")
-                .setBufferPixels(BUFFER_SIZE)
-                .setMinZoom(10);
-            feature.tags().forEach((k, v) -> {
-                feat.setAttr(k, v);
-            });
+            var feat = collector.line(LAYER_NAME);
+
+            // create a new feature in the outdoor layer as a point
+            feat.setBufferPixels(BUFFER_SIZE);
+            feat.setMinZoom(12);
+
+            // get original value of ref tag
+            feat.setAttr(Fields.REF, sourceFeature.getString("ref"));
+            feat.setAttr(Fields.NAME, sourceFeature.getString("name"));
+            feat.setAttr(Fields.NETWORK, sourceFeature.getString("network"));
+            feat.setAttr(Fields.OSMC_COLOR, sourceFeature.getString("osmc_color"));
+            feat.setAttr(Fields.OSMC_FOREGROUND, sourceFeature.getString("osmc_foreground"));
+            feat.setAttr(Fields.OSMC_ORDER, sourceFeature.getLong("osmc_order"));
+            feat.setAttr(Fields.HIGHWAY, this.highwayMapping.getOrElse(sourceFeature, null));
+            feat.setAttr(OpenMapTilesSchema.Transportation.Fields.BRUNNEL,
+                brunnel(sourceFeature.getBoolean("bridge"), sourceFeature.getBoolean("tunnel"), sourceFeature.getBoolean("ford")));
         }
     }
 }

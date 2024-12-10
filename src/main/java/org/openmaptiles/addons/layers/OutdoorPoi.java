@@ -60,6 +60,7 @@ public class OutdoorPoi implements Layer,
         feat.setAttr(Fields.CLASS, classValue);
         feat.setAttr(Fields.SUBCLASS, subClassValue);
         feat.putAttrs(OmtLanguageUtils.getNames(sourceFeature.tags(), translations));
+        feat.setAttr(Fields.ELE, sourceFeature.getString("ele"));
         feat.setPointLabelGridPixelSize(14, 64);
         feat.setMinZoom(14);
         // TODO prepare rank
