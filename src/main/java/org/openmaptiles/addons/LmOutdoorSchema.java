@@ -25,6 +25,7 @@ public class LmOutdoorSchema {
             public static final String ACCESS = "access";
             public static final String TRACKTYPE = "tracktype";
             public static final String BRUNNEL = "brunnel";
+            public static final String VIA_FERRATA_SCALE = "via_ferrata_scale";
         }
 
         final class FieldValues {
@@ -37,6 +38,8 @@ public class LmOutdoorSchema {
         }
 
         Expression IS_TRACK_EXPRESSION = Expression.matchAny("highway", "track");
+
+        Expression IS_VIA_FERRATA_EXPRESSION = Expression.matchAny("highway", "via_ferrata");
     }
 
     public interface OutdoorPoiSchema {
@@ -167,20 +170,35 @@ public class LmOutdoorSchema {
             public static final String OSMC_COLOR = "osmc_color";
             public static final String OSMC_ORDER = "osmc_order";
             public static final String OSMC_FOREGROUND = "osmc_foreground";
-
         }
 
         Expression IS_HIKE_EXPRESSION = Expression.matchAny("route", "hiking");
 
         MultiExpression<String> LM_HIGHWAY_MAPPING = MultiExpression.of(List.of(
-            MultiExpression.entry("motorway", matchAny("lm_highway", "motorway", "motorway_link")),
-            MultiExpression.entry("trunk", matchAny("lm_highway", "trunk", "trunk_link")),
-            MultiExpression.entry("primary", matchAny("lm_highway", "primary", "primary_link")),
-            MultiExpression.entry("secondary", matchAny("lm_highway", "secondary", "secondary_link")),
-            MultiExpression.entry("tertiary", matchAny("lm_highway", "tertiary", "tertiary_link")),
-            MultiExpression.entry("minor", matchAny("lm_highway", "unclassified", "residential", "living_street", "road")),
-            MultiExpression.entry("track", matchAny("lm_highway", "track")),
-            MultiExpression.entry("path", matchAny("lm_highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata"))
+            MultiExpression.entry("motorway", or(
+                matchAny("lm_highway", "motorway", "motorway_link"),
+                matchAny("highway", "motorway", "motorway_link"))),
+            MultiExpression.entry("trunk", or(
+                matchAny("lm_highway", "trunk", "trunk_link"),
+                matchAny("highway", "trunk", "trunk_link"))),
+            MultiExpression.entry("primary", or(
+                matchAny("lm_highway", "primary", "primary_link"),
+                matchAny("highway", "primary", "primary_link"))),
+            MultiExpression.entry("secondary", or(
+                matchAny("lm_highway", "secondary", "secondary_link"),
+                matchAny("highway", "secondary", "secondary_link"))),
+            MultiExpression.entry("tertiary", or(
+                matchAny("lm_highway", "tertiary", "tertiary_link"),
+                matchAny("highway", "tertiary", "tertiary_link"))),
+            MultiExpression.entry("minor", or(
+                matchAny("lm_highway", "unclassified", "residential", "living_street", "road"),
+                matchAny("highway", "unclassified", "residential", "living_street", "road"))),
+            MultiExpression.entry("track", or(
+                matchAny("lm_highway", "track"),
+                matchAny("highway", "track"))),
+            MultiExpression.entry("path", or(
+                matchAny("lm_highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata"),
+                matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata")))
         ));
     }
 
@@ -190,7 +208,6 @@ public class LmOutdoorSchema {
             public static final String MTB_SCALE = "mtb_scale";
 
         }
-
 
         Expression IS_CYCLING_EXPRESSION = Expression.matchAny("route", "bicycle");
         Expression IS_MTB_EXPRESSION = or(Expression.matchAny("route", "mtb"),
