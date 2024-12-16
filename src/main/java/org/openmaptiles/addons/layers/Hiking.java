@@ -63,6 +63,8 @@ public class Hiking implements
             feat.setAttr(Fields.HIGHWAY, this.highwayMapping.getOrElse(sourceFeature, null));
             feat.setAttr(OpenMapTilesSchema.Transportation.Fields.BRUNNEL,
                 brunnel(sourceFeature.getBoolean("bridge"), sourceFeature.getBoolean("tunnel"), sourceFeature.getBoolean("ford")));
+
+            
         }
     }
 }

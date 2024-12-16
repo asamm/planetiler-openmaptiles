@@ -23,7 +23,7 @@ public class ExtraLayers {
             new Hiking(translations, config, stats),
             new Cycling(),
             new Contour(),
-            new LmTransportation(),
+            new LmTransportation(translations, config, stats),
             new OutdoorPoi(translations, config, stats),
             new Ski(translations, config, stats)
         );

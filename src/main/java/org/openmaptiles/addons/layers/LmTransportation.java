@@ -1,7 +1,10 @@
 package org.openmaptiles.addons.layers;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.reader.SourceFeature;
+import com.onthegomap.planetiler.stats.Stats;
+import com.onthegomap.planetiler.util.Translations;
 import java.util.Set;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
@@ -21,6 +24,17 @@ public class LmTransportation implements Layer,
         "private", "no"
     );
 
+    /**
+     * Config option to process tracks and track type in LoMaps style
+     */
+    private final boolean processLoMapsTracks;
+
+    public LmTransportation(Translations translations, PlanetilerConfig config, Stats stats) {
+        this.processLoMapsTracks = config.arguments().getBoolean(
+            "lomaps_add_tracks",
+            "LoMaps Transportation: add tracks and tracktypes (because tracktype is missing in OpenMapTiles)",
+            false);
+    }
 
     @Override
     public String name() {
@@ -28,16 +42,26 @@ public class LmTransportation implements Layer,
     }
 
     @Override
-    public void processAllOsm(SourceFeature feature, FeatureCollector features) {
+    public void processAllOsm(SourceFeature sourceFeature, FeatureCollector features) {
 
-        if (feature.canBeLine() && IS_TRACK_EXPRESSION.evaluate(feature)) {
+        boolean is_via_ferrata = IS_VIA_FERRATA_EXPRESSION.evaluate(sourceFeature);
+
+        // Check if the source feature can be a line and if it is either a via ferrata or a track
+        // (when processLoMapsTracks is enabled in configuration)
+        if (sourceFeature.canBeLine() &&
+            (is_via_ferrata ||  (this.processLoMapsTracks && IS_TRACK_EXPRESSION.evaluate(sourceFeature)))) {
+
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setAttrWithMinzoom(Fields.CLASS, feature.getTag(OsmTags.HIGHWAY), 12);
-            feat.setAttrWithMinzoom(Fields.ACCESS, getAccess(feature.getTag(OsmTags.ACCESS)), 12);
-            feat.setAttrWithMinzoom(Fields.ONEWAY, getOneWay(feature.getTag(OsmTags.ONEWAY)), 12);
-            feat.setAttrWithMinzoom(Fields.TRACKTYPE, feature.getTag(OsmTags.TRACKTYPE), 12);
-            feat.setAttrWithMinzoom(Fields.BRUNNEL, getBrunnel(feature), 12);
+            feat.setAttrWithMinzoom(Fields.CLASS, sourceFeature.getTag(OsmTags.HIGHWAY), 12);
+            feat.setAttrWithMinzoom(Fields.ACCESS, getAccess(sourceFeature.getTag(OsmTags.ACCESS)), 12);
+            feat.setAttrWithMinzoom(Fields.ONEWAY, getOneWay(sourceFeature.getTag(OsmTags.ONEWAY)), 12);
+            feat.setAttrWithMinzoom(Fields.TRACKTYPE, sourceFeature.getTag(OsmTags.TRACKTYPE), 12);
+            feat.setAttrWithMinzoom(Fields.BRUNNEL, getBrunnel(sourceFeature), 12);
+
+            if (is_via_ferrata){
+                feat.setAttr(Fields.VIA_FERRATA_SCALE, sourceFeature.getString(Fields.VIA_FERRATA_SCALE));
+            }
         }
     }
 
