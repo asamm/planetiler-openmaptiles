@@ -34,36 +34,44 @@ public class Cycling implements
     @Override
     public void processAllOsm(SourceFeature sourceFeature, FeatureCollector collector) {
 
-        if (!sourceFeature.canBeLine()) {
-            return;
-        }
+        if (sourceFeature.canBeLine()) {
+            boolean isCysling = IS_CYCLING_EXPRESSION.evaluate(sourceFeature);
+            boolean isMTB = IS_MTB_EXPRESSION.evaluate(sourceFeature);
 
-        boolean isCysling = IS_CYCLING_EXPRESSION.evaluate(sourceFeature);
-        boolean isMTB = IS_MTB_EXPRESSION.evaluate(sourceFeature);
+            if (isCysling || isMTB) {
 
-        if (isCysling || isMTB) {
+                var feat = collector.line(LAYER_NAME);
+                feat.setBufferPixels(BUFFER_SIZE);
+                feat.setMinZoom(12);
 
-            var feat = collector.line(LAYER_NAME);
-            feat.setBufferPixels(BUFFER_SIZE);
-            feat.setMinZoom(12);
+                feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.REF, sourceFeature.getString("ref"));
+                feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.NAME, sourceFeature.getString("name"));
+                feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.NETWORK, sourceFeature.getString("network"));
+                feat.setAttr("route", sourceFeature.getString("route"));
 
-            feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.REF, sourceFeature.getString("ref"));
-            feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.NAME, sourceFeature.getString("name"));
-            feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.NETWORK, sourceFeature.getString("network"));
-            feat.setAttr("route", sourceFeature.getString("route"));
+                feat.setAttr(
+                    LmOutdoorSchema.OutdoorHikeSchema.Fields.HIGHWAY, this.highwayMapping.getOrElse(sourceFeature, null));
+                feat.setAttr(OpenMapTilesSchema.Transportation.Fields.BRUNNEL,
+                    brunnel(sourceFeature.getBoolean("bridge"), sourceFeature.getBoolean("tunnel"),
+                        sourceFeature.getBoolean("ford")));
 
-            feat.setAttr(
-                LmOutdoorSchema.OutdoorHikeSchema.Fields.HIGHWAY, this.highwayMapping.getOrElse(sourceFeature, null));
-            feat.setAttr(OpenMapTilesSchema.Transportation.Fields.BRUNNEL,
-                brunnel(sourceFeature.getBoolean("bridge"), sourceFeature.getBoolean("tunnel"),
-                    sourceFeature.getBoolean("ford")));
+                if (isMTB) {
+                    feat.setAttr("mtb", 1);
+                    feat.setAttr(LmOutdoorSchema.OutdoorCyclingSchema.Fields.MTB_SCALE,
+                        sourceFeature.getString("mtb:scale"));
+                }
 
-            if (isMTB) {
-                feat.setAttr("mtb", 1);
-                feat.setAttr(LmOutdoorSchema.OutdoorCyclingSchema.Fields.MTB_SCALE,
-                    sourceFeature.getString("mtb:scale"));
             }
+        } else if (sourceFeature.isPoint()) {
+            // NL BE Network nodes
+            if (IS_NODE_NETWORK.evaluate(sourceFeature) && sourceFeature.hasTag("rcn_ref")) {
 
+                var feat = collector.point(LAYER_NAME);
+                feat.setBufferPixels(BUFFER_SIZE);
+                feat.setMinZoom(14);
+                feat.setAttr("network_type", sourceFeature.getString("network:type"));
+                feat.setAttr(LmOutdoorSchema.OutdoorCyclingSchema.Fields.RCN_REF, sourceFeature.getString("rcn_ref"));
+            }
         }
     }
 }

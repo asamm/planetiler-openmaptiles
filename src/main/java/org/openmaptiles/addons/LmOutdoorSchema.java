@@ -170,9 +170,13 @@ public class LmOutdoorSchema {
             public static final String OSMC_COLOR = "osmc_color";
             public static final String OSMC_ORDER = "osmc_order";
             public static final String OSMC_FOREGROUND = "osmc_foreground";
+
+            public static final String RWN_REF = "rwn_ref";
         }
 
         Expression IS_HIKE_EXPRESSION = Expression.matchAny("route", "hiking");
+
+
 
         MultiExpression<String> LM_HIGHWAY_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry("motorway", or(
@@ -207,10 +211,14 @@ public class LmOutdoorSchema {
         final class Fields extends SchemaFields {
             public static final String MTB_SCALE = "mtb_scale";
 
+            public static final String RCN_REF = "rcn_ref";
         }
 
         Expression IS_CYCLING_EXPRESSION = Expression.matchAny("route", "bicycle");
+
         Expression IS_MTB_EXPRESSION = or(Expression.matchAny("route", "mtb"),
             Expression.matchAny("bicycle", "mtb", "yes","designated", "official"));
+
+        Expression IS_NODE_NETWORK = Expression.matchAny("network:type", "node_network");
     }
 }

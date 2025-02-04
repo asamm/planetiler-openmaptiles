@@ -3,6 +3,7 @@ package org.openmaptiles.addons.layers;
 import static com.onthegomap.planetiler.util.MemoryEstimator.CLASS_HEADER_BYTES;
 import static com.onthegomap.planetiler.util.MemoryEstimator.POINTER_BYTES;
 import static com.onthegomap.planetiler.util.MemoryEstimator.estimateSize;
+import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorCyclingSchema.IS_NODE_NETWORK;
 import static org.openmaptiles.util.Utils.brunnel;
 
 import com.onthegomap.planetiler.FeatureCollector;
@@ -65,6 +66,16 @@ public class Hiking implements
                 brunnel(sourceFeature.getBoolean("bridge"), sourceFeature.getBoolean("tunnel"), sourceFeature.getBoolean("ford")));
 
             
+        } else if (sourceFeature.isPoint()) {
+            // NL BE Network nodes
+            if (IS_NODE_NETWORK.evaluate(sourceFeature) && sourceFeature.hasTag("rwn_ref")) {
+
+                var feat = collector.point(LAYER_NAME);
+                feat.setBufferPixels(BUFFER_SIZE);
+                feat.setMinZoom(14);
+                feat.setAttr("network_type", sourceFeature.getString("network:type"));
+                feat.setAttr(Fields.RWN_REF, sourceFeature.getString("rwn_ref"));
+            }
         }
     }
 }
