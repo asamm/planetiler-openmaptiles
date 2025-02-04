@@ -24,8 +24,9 @@ public class Contour implements Layer, OpenMapTilesProfile.OsmAllProcessor {
 
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setAttrWithMinzoom("height", ele, 11);
-            feat.setAttrWithMinzoom("nth_line", get_maptiler_nth_value(ele), 11);
+            feat.setMinZoom(13);
+            feat.setAttr("height", ele);
+            feat.setAttr("nth_line", get_maptiler_nth_value(ele));
         }
     }
 
