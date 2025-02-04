@@ -53,14 +53,17 @@ public class LmTransportation implements Layer,
 
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setAttrWithMinzoom(Fields.CLASS, sourceFeature.getTag(OsmTags.HIGHWAY), 12);
-            feat.setAttrWithMinzoom(Fields.ACCESS, getAccess(sourceFeature.getTag(OsmTags.ACCESS)), 12);
-            feat.setAttrWithMinzoom(Fields.ONEWAY, getOneWay(sourceFeature.getTag(OsmTags.ONEWAY)), 12);
-            feat.setAttrWithMinzoom(Fields.TRACKTYPE, sourceFeature.getTag(OsmTags.TRACKTYPE), 12);
-            feat.setAttrWithMinzoom(Fields.BRUNNEL, getBrunnel(sourceFeature), 12);
+            feat.setMinZoom(12);
+            feat.setAttr(Fields.CLASS, sourceFeature.getTag(OsmTags.HIGHWAY));
+            feat.setAttr(Fields.ACCESS, getAccess(sourceFeature.getTag(OsmTags.ACCESS)));
+            feat.setAttr(Fields.ONEWAY, getOneWay(sourceFeature.getTag(OsmTags.ONEWAY)));
+            feat.setAttr(Fields.TRACKTYPE, sourceFeature.getTag(OsmTags.TRACKTYPE));
+            feat.setAttr(Fields.BRUNNEL, getBrunnel(sourceFeature));
 
             if (is_via_ferrata){
+                feat.setMinZoom(13);
                 feat.setAttr(Fields.VIA_FERRATA_SCALE, sourceFeature.getString(Fields.VIA_FERRATA_SCALE));
+                feat.setAttr(Fields.SUBCLASS, sourceFeature.getTag(OsmTags.HIGHWAY));
             }
         }
     }
