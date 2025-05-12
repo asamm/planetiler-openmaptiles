@@ -1,29 +1,43 @@
 package org.openmaptiles.addons.layers;
 
-import static org.openmaptiles.util.Utils.brunnel;
+import static org.openmaptiles.addons.LmOutdoorSchema.LmTrasportationSchema;
+import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorCyclingSchema;
+import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorHikeSchema;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.ForwardingProfile;
+import com.onthegomap.planetiler.VectorTile;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.reader.SourceFeature;
+import com.onthegomap.planetiler.stats.Stats;
+import com.onthegomap.planetiler.util.Translations;
+import java.util.List;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
-import org.openmaptiles.addons.LmOutdoorSchema;
-import org.openmaptiles.generated.OpenMapTilesSchema;
+import org.openmaptiles.addons.LmUtils;
+import org.openmaptiles.addons.OsmTags;
 
 public class Cycling implements
     Layer,
     OpenMapTilesProfile.OsmAllProcessor,
-    LmOutdoorSchema.OutdoorCyclingSchema,
-    LmOutdoorSchema.OutdoorHikeSchema {
+    OutdoorCyclingSchema,
+    OutdoorHikeSchema,
+    ForwardingProfile.LayerPostProcessor {
 
     final double BUFFER_SIZE = 4.0;
+
+    final int DEF_MIN_ZOOM = 9;
+
+    private final PlanetilerConfig config;
 
     final String LAYER_NAME = "cycling";
 
     private final MultiExpression.Index<String> highwayMapping;
 
-    public Cycling() {
+    public Cycling(Translations translations,  PlanetilerConfig config, Stats stats) {
         this.highwayMapping = LM_HIGHWAY_MAPPING.index();
+        this.config = config;
     }
 
     @Override
@@ -42,22 +56,21 @@ public class Cycling implements
 
                 var feat = collector.line(LAYER_NAME);
                 feat.setBufferPixels(BUFFER_SIZE);
-                feat.setMinZoom(12);
+                feat.setMinZoom(DEF_MIN_ZOOM);
 
-                feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.REF, sourceFeature.getString("ref"));
-                feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.NAME, sourceFeature.getString("name"));
-                feat.setAttr(LmOutdoorSchema.OutdoorHikeSchema.Fields.NETWORK, sourceFeature.getString("network"));
+                feat.setAttr(OutdoorHikeSchema.Fields.REF, sourceFeature.getString("ref"));
+                feat.setAttrWithMinzoom(OutdoorHikeSchema.Fields.NAME, sourceFeature.getString("name"), 14);
+                feat.setAttr(OutdoorHikeSchema.Fields.NETWORK, sourceFeature.getString("network"));
                 feat.setAttr("route", sourceFeature.getString("route"));
 
                 feat.setAttr(
-                    LmOutdoorSchema.OutdoorHikeSchema.Fields.HIGHWAY, this.highwayMapping.getOrElse(sourceFeature, null));
-                feat.setAttr(OpenMapTilesSchema.Transportation.Fields.BRUNNEL,
-                    brunnel(sourceFeature.getBoolean("bridge"), sourceFeature.getBoolean("tunnel"),
-                        sourceFeature.getBoolean("ford")));
+                    OutdoorHikeSchema.Fields.HIGHWAY, this.highwayMapping.getOrElse(sourceFeature, null));
+                feat.setAttr(LmTrasportationSchema.Fields.BRUNNEL, LmTransportation.getBrunnel(sourceFeature));
+                feat.setAttrWithMinzoom(LmTrasportationSchema.Fields.ONEWAY, LmTransportation.getOneWay(sourceFeature.getTag(OsmTags.ONEWAY)),14);
 
                 if (isMTB) {
                     feat.setAttr("mtb", 1);
-                    feat.setAttr(LmOutdoorSchema.OutdoorCyclingSchema.Fields.MTB_SCALE,
+                    feat.setAttr(OutdoorCyclingSchema.Fields.MTB_SCALE,
                         sourceFeature.getString("mtb:scale"));
                 }
 
@@ -70,8 +83,13 @@ public class Cycling implements
                 feat.setBufferPixels(BUFFER_SIZE);
                 feat.setMinZoom(14);
                 feat.setAttr("network_type", sourceFeature.getString("network:type"));
-                feat.setAttr(LmOutdoorSchema.OutdoorCyclingSchema.Fields.RCN_REF, sourceFeature.getString("rcn_ref"));
+                feat.setAttr(OutdoorCyclingSchema.Fields.RCN_REF, sourceFeature.getString("rcn_ref"));
             }
         }
+    }
+
+    @Override
+    public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+        return LmUtils.mergeTransportationLines(zoom, BUFFER_SIZE, items, config);
     }
 }

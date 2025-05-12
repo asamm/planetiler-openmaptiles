@@ -1,20 +1,30 @@
 package org.openmaptiles.addons.layers;
 
+import static org.openmaptiles.util.Utils.coalesce;
+
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
+import com.onthegomap.planetiler.util.ZoomFunction;
+import java.util.List;
 import java.util.Set;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.addons.LmUtils;
 import org.openmaptiles.addons.OsmTags;
+import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.util.Utils;
 
 public class LmTransportation implements Layer,
     LmOutdoorSchema.LmTrasportationSchema,
-    OpenMapTilesProfile.OsmAllProcessor {
+    OpenMapTilesProfile.OsmAllProcessor,
+    ForwardingProfile.LayerPostProcessor{
 
     private static final double BUFFER_SIZE = 4.0;
 
@@ -24,16 +34,27 @@ public class LmTransportation implements Layer,
         "private", "no"
     );
 
+    public static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
+
+    public static final ZoomFunction.MeterToPixelThresholds MIN_LENGTH = ZoomFunction.meterThresholds()
+        .put(10, 500)
+        .put(11, 200)
+        .put(11, 100);
+
     /**
      * Config option to process tracks and track type in LoMaps style
      */
     private final boolean processLoMapsTracks;
+
+    private final PlanetilerConfig config;
 
     public LmTransportation(Translations translations, PlanetilerConfig config, Stats stats) {
         this.processLoMapsTracks = config.arguments().getBoolean(
             "lomaps_add_tracks",
             "LoMaps Transportation: add tracks and tracktypes (because tracktype is missing in OpenMapTiles)",
             false);
+
+        this.config = config;
     }
 
     @Override
@@ -68,12 +89,17 @@ public class LmTransportation implements Layer,
         }
     }
 
+    @Override
+    public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+        return LmUtils.mergeTransportationLines(zoom, BUFFER_SIZE, items, config);
+    }
+
     /**
      * Returns a value for {@code brunnel} tag constrained when recognize if feature is a bridge, tunnel or ford.
      * @param feature feature to check
      * @return value 'bridge', 'tunnel', 'ford' or null
      */
-    private Object getBrunnel(SourceFeature feature) {
+    public static Object getBrunnel(SourceFeature feature) {
         return Utils.brunnel(feature.getBoolean(OsmTags.BRIDGE), feature.getBoolean(OsmTags.TUNNEL),  feature.getBoolean(
             OsmTags.FORD));
     }
@@ -81,7 +107,7 @@ public class LmTransportation implements Layer,
     /**
      * Returns a value for {@code access} tag constrained to a small set of known values from raw OSM data.
      */
-    private String getAccess(Object value) {
+    public static String getAccess(Object value) {
         return value == null ? null : ACCESS_NO_VALUES.contains(String.valueOf(value)) ? "no" : null;
     }
 
@@ -94,7 +120,7 @@ public class LmTransportation implements Layer,
      * @param value
      * @return
      */
-    private Integer getOneWay(Object value) {
+    public static Integer getOneWay(Object value) {
         if (Utils.nullOrEmpty(value)) {
             return null;
         }
