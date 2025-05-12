@@ -21,8 +21,8 @@ public class ExtraLayers {
         return List.of(
             // Create classes that extend Layer interface in the addons package, then instantiate them here
             new Hiking(translations, config, stats),
-            new Cycling(),
-            new Contour(),
+            new Cycling(translations, config, stats),
+            new Contour(translations, config, stats),
             new LmTransportation(translations, config, stats),
             new OutdoorPoi(translations, config, stats),
             new Ski(translations, config, stats)

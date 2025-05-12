@@ -1,7 +1,10 @@
 package org.openmaptiles.addons.layers;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.reader.SourceFeature;
+import com.onthegomap.planetiler.stats.Stats;
+import com.onthegomap.planetiler.util.Translations;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
 
@@ -11,9 +14,21 @@ public class Contour implements Layer, OpenMapTilesProfile.OsmAllProcessor {
 
     final double BUFFER_SIZE = 4.0;
 
+    private final int contoursMinZoom;
+
     @Override
     public String name() {
         return LAYER_NAME;
+    }
+
+    public Contour(Translations translations, PlanetilerConfig config, Stats stats) {
+
+        this.contoursMinZoom = config.arguments().getInteger(
+            "lomaps_contour_minzoom",
+            "LoMaps Contour Lines: specify min zoom for contour line when appears in data",
+            13
+        );
+
     }
 
     @Override
@@ -24,7 +39,7 @@ public class Contour implements Layer, OpenMapTilesProfile.OsmAllProcessor {
 
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setMinZoom(13);
+            feat.setMinZoom(contoursMinZoom);
             feat.setAttr("height", ele);
             feat.setAttr("nth_line", get_maptiler_nth_value(ele));
         }
