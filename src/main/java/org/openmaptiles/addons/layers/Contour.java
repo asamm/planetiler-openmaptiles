@@ -26,7 +26,7 @@ public class Contour implements Layer, OpenMapTilesProfile.OsmAllProcessor {
         this.contoursMinZoom = config.arguments().getInteger(
             "lomaps_contour_minzoom",
             "LoMaps Contour Lines: specify min zoom for contour line when appears in data",
-            13
+            12
         );
 
     }
