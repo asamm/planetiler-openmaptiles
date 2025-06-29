@@ -2,11 +2,11 @@ package org.openmaptiles.addons;
 
 import static com.onthegomap.planetiler.expression.Expression.and;
 import static com.onthegomap.planetiler.expression.Expression.matchAny;
+import static com.onthegomap.planetiler.expression.Expression.matchField;
 import static com.onthegomap.planetiler.expression.Expression.or;
 
 import com.onthegomap.planetiler.expression.Expression;
 import com.onthegomap.planetiler.expression.MultiExpression;
-import com.onthegomap.planetiler.geo.GeometryType;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +26,9 @@ public class LmOutdoorSchema {
             public static final String TRACKTYPE = "tracktype";
             public static final String BRUNNEL = "brunnel";
             public static final String VIA_FERRATA_SCALE = "via_ferrata_scale";
+            public static final String LAYER = "layer";
+            public static final String TRAIL_VISIBILITY = "trail_visibility";
+            public static final String ASSISTED_TRAIL = "assisted_trail";
         }
 
         final class FieldValues {
@@ -40,6 +43,23 @@ public class LmOutdoorSchema {
         Expression IS_TRACK_EXPRESSION = Expression.matchAny("highway", "track");
 
         Expression IS_VIA_FERRATA_EXPRESSION = Expression.matchAny("highway", "via_ferrata");
+
+        Expression IS_PATH_EXPRESSION = Expression.matchAny("highway", "path");
+
+        MultiExpression<String> ASSISTED_TRAIL_MAPPING = MultiExpression.of(List.of(
+            MultiExpression.entry("yes", Expression.matchAny("assisted_trail", "yes")),
+            MultiExpression.entry("rope",
+                or(
+                    Expression.matchAny("assisted_trail", "ropes", "iron_ropes","rope","iron_cable"),
+                    Expression.matchField("safety_rope")
+                )),
+            MultiExpression.entry("ladder",
+                or(
+                    Expression.matchAny("assisted_trail", "ladder"),
+                    Expression.matchField("ladder")
+                )),
+            MultiExpression.entry("rungs", Expression.matchField("rungs"))
+        ));
     }
 
     public interface OutdoorPoiSchema {
@@ -170,13 +190,20 @@ public class LmOutdoorSchema {
             public static final String OSMC_COLOR = "osmc_color";
             public static final String OSMC_ORDER = "osmc_order";
             public static final String OSMC_FOREGROUND = "osmc_foreground";
+            public static final String ROUTE_SPEC = "route_spec";
 
             public static final String RWN_REF = "rwn_ref";
         }
 
-        Expression IS_HIKE_EXPRESSION = Expression.matchAny("route", "hiking");
+        // Accepts features where "route" is "hiking" or "foot", and either "osmc:symbol" or "network" field is defined.
+        Expression IS_HIKE_EXPRESSION = and(
+            matchAny("route", "hiking", "foot"),
+            or (matchField("osmc:symbol"), matchField("network"))
+        );
 
-
+        Expression IS_EDUCATIONAL_EXPRESSION = or(
+            Expression.matchAny("educational", "yes", "1"),
+            Expression.matchAny("osmc:symbol", "green:white:green_backslash"));
 
         MultiExpression<String> LM_HIGHWAY_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry("motorway", or(
@@ -195,8 +222,8 @@ public class LmOutdoorSchema {
                 matchAny("lm_highway", "tertiary", "tertiary_link"),
                 matchAny("highway", "tertiary", "tertiary_link"))),
             MultiExpression.entry("minor", or(
-                matchAny("lm_highway", "unclassified", "residential", "living_street", "road"),
-                matchAny("highway", "unclassified", "residential", "living_street", "road"))),
+                matchAny("lm_highway", "unclassified", "residential", "living_street", "road", "service"),
+                matchAny("highway", "unclassified", "residential", "living_street", "road", "service"))),
             MultiExpression.entry("track", or(
                 matchAny("lm_highway", "track"),
                 matchAny("highway", "track"))),
@@ -214,11 +241,54 @@ public class LmOutdoorSchema {
             public static final String RCN_REF = "rcn_ref";
         }
 
-        Expression IS_CYCLING_EXPRESSION = Expression.matchAny("route", "bicycle");
+        // Cycling from relation
+        Expression IS_CYCLING_ROUTE_EXPRESSION = Expression.matchAny("route", "bicycle");
 
-        Expression IS_MTB_EXPRESSION = or(Expression.matchAny("route", "mtb"),
-            Expression.matchAny("bicycle", "mtb", "yes","designated", "official"));
+        // Simple cycleway from highway tag
+        Expression IS_CYCLING_SIMPLE_EXPRESSION = and(
+            or(
+                Expression.not(Expression.matchField("smoothness")),
+                Expression.matchAny("smoothness", "excellent", "good", "intermediate")
+            ),
+            or(
+                Expression.matchAny("highway", "cycleway"),
+                Expression.matchAny("bicycle", "designated", "official")
+            )
+        );
+
+        Expression IS_MTB_ROUTE_EXPRESSION = Expression.matchAny("route", "mtb");
+
+        Expression IS_MTB_SIMPLE_EXPRESSION = or(
+            Expression.matchAny("bicycle", "mtb"),
+            Expression.matchAny("mtb", "designated", "official")
+        );
 
         Expression IS_NODE_NETWORK = Expression.matchAny("network:type", "node_network");
+
+    }
+
+    // POWER
+    public interface OutdoorPowerSchema {
+
+        final class Fields extends SchemaFields {
+
+            public static final String POWER = "power   ";
+            public static final String NAME = "name" ;
+        }
+
+        MultiExpression<String> POWER_CLASS_MAPPING = MultiExpression.of(List.of(
+            MultiExpression.entry("line", Expression.matchAny("power", "line")),
+            MultiExpression.entry("minor_line", Expression.matchAny("power", "minor_line")),
+            MultiExpression.entry("pole", Expression.matchAny("power", "pole")),
+            MultiExpression.entry("tower", Expression.matchAny("power", "tower")),
+            MultiExpression.entry("transformer", Expression.matchAny("power", "transformer", "switch", "substation")),
+            MultiExpression.entry("generator", Expression.matchAny("power", "generator")),
+            MultiExpression.entry("plant", Expression.matchAny("power", "plant"))
+        ));
+
+        // create expression to recognize power generator
+        Expression IS_POWER_GENERATOR_EXPRESSION = Expression.matchAny("power", "generator", "plant", "substation");
+
+        Expression IS_MINOR_LINE_POLE_EXPRESSION = Expression.matchAny("power", "minor_line", "pole");
     }
 }

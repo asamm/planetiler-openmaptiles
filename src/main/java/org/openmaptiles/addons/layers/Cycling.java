@@ -22,8 +22,7 @@ public class Cycling implements
     Layer,
     OpenMapTilesProfile.OsmAllProcessor,
     OutdoorCyclingSchema,
-    OutdoorHikeSchema,
-    ForwardingProfile.LayerPostProcessor {
+    OutdoorHikeSchema {
 
     final double BUFFER_SIZE = 4.0;
 
@@ -49,17 +48,22 @@ public class Cycling implements
     public void processAllOsm(SourceFeature sourceFeature, FeatureCollector collector) {
 
         if (sourceFeature.canBeLine()) {
-            boolean isCysling = IS_CYCLING_EXPRESSION.evaluate(sourceFeature);
-            boolean isMTB = IS_MTB_EXPRESSION.evaluate(sourceFeature);
+            boolean isCyslingRoute = IS_CYCLING_ROUTE_EXPRESSION.evaluate(sourceFeature);
+            boolean isCyslingSimple = IS_CYCLING_SIMPLE_EXPRESSION.evaluate(sourceFeature);
+            boolean isMtbRoute = IS_MTB_ROUTE_EXPRESSION.evaluate(sourceFeature);
+            boolean isMtbSimple = IS_MTB_SIMPLE_EXPRESSION.evaluate(sourceFeature);
 
-            if (isCysling || isMTB) {
+            if (isCyslingRoute || isCyslingSimple || isMtbRoute || isMtbSimple) {
 
                 var feat = collector.line(LAYER_NAME);
                 feat.setBufferPixels(BUFFER_SIZE);
                 feat.setMinZoom(DEF_MIN_ZOOM);
 
                 feat.setAttr(OutdoorHikeSchema.Fields.REF, sourceFeature.getString("ref"));
-                feat.setAttrWithMinzoom(OutdoorHikeSchema.Fields.NAME, sourceFeature.getString("name"), 14);
+                if (isCyslingRoute || isMtbRoute) {
+                    // name set only for cycling routes not for simple cycling paths
+                    feat.setAttrWithMinzoom(OutdoorHikeSchema.Fields.NAME, sourceFeature.getString("name"), 14);
+                }
                 feat.setAttr(OutdoorHikeSchema.Fields.NETWORK, sourceFeature.getString("network"));
                 feat.setAttr("route", sourceFeature.getString("route"));
 
@@ -68,7 +72,7 @@ public class Cycling implements
                 feat.setAttr(LmTrasportationSchema.Fields.BRUNNEL, LmTransportation.getBrunnel(sourceFeature));
                 feat.setAttrWithMinzoom(LmTrasportationSchema.Fields.ONEWAY, LmTransportation.getOneWay(sourceFeature.getTag(OsmTags.ONEWAY)),14);
 
-                if (isMTB) {
+                if (isMtbRoute || isMtbSimple) {
                     feat.setAttr("mtb", 1);
                     feat.setAttr(OutdoorCyclingSchema.Fields.MTB_SCALE,
                         sourceFeature.getString("mtb:scale"));
@@ -81,15 +85,15 @@ public class Cycling implements
 
                 var feat = collector.point(LAYER_NAME);
                 feat.setBufferPixels(BUFFER_SIZE);
-                feat.setMinZoom(14);
+                feat.setMinZoom(12);
                 feat.setAttr("network_type", sourceFeature.getString("network:type"));
                 feat.setAttr(OutdoorCyclingSchema.Fields.RCN_REF, sourceFeature.getString("rcn_ref"));
             }
         }
     }
-
-    @Override
-    public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-        return LmUtils.mergeTransportationLines(zoom, BUFFER_SIZE, items, config);
-    }
+//    Do not merge cycling lines because incorrect offset (cycling can collide with hiking lines).
+//    @Override
+//    public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+//        return LmUtils.mergeTransportationLines(zoom, BUFFER_SIZE, items, config);
+//    }
 }

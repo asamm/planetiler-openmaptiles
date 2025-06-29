@@ -10,6 +10,7 @@ import org.openmaptiles.addons.layers.Cycling;
 import org.openmaptiles.addons.layers.Hiking;
 import org.openmaptiles.addons.layers.LmTransportation;
 import org.openmaptiles.addons.layers.OutdoorPoi;
+import org.openmaptiles.addons.layers.Power;
 import org.openmaptiles.addons.layers.Ski;
 
 /**
@@ -25,6 +26,7 @@ public class ExtraLayers {
             new Contour(translations, config, stats),
             new LmTransportation(translations, config, stats),
             new OutdoorPoi(translations, config, stats),
+            new Power(translations,config,stats),
             new Ski(translations, config, stats)
         );
     }

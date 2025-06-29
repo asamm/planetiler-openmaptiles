@@ -69,6 +69,20 @@ final public class OsmTags {
     /** rental services (e.g., bicycles, skis): https://wiki.openstreetmap.org/wiki/Key:rental */
     public static final String RENTAL = "rental";
 
+    // Power generation tags
+
+    /** power infrastructure: https://wiki.openstreetmap.org/wiki/Key:power */
+    public static final String POWER = "power";
+
+    /** generator source (nuclear, wind, hydro, etc.): https://wiki.openstreetmap.org/wiki/Key:generator:source */
+    public static final String GENERATOR_SOURCE = "generator:source";
+
+    /** generator method (fission, wind_turbine, water-storage, etc.): https://wiki.openstreetmap.org/wiki/Key:generator:method */
+    public static final String GENERATOR_METHOD = "generator:method";
+
+    /** generator type (PWR, horizontal_axis, francis_turbine, etc.): https://wiki.openstreetmap.org/wiki/Key:generator:type */
+    public static final String GENERATOR_TYPE = "generator:type";
+
     /** fireplace areas (e.g., campfire pits): https://wiki.openstreetmap.org/wiki/Tag:tourism=camp_site#Fireplace */
     public static final String FIREPLACE = "fireplace";
 }

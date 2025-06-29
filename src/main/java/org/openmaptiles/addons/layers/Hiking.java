@@ -29,8 +29,7 @@ import org.openmaptiles.util.OmtLanguageUtils;
 public class Hiking implements
     Layer,
     OpenMapTilesProfile.OsmAllProcessor ,
-    LmOutdoorSchema.OutdoorHikeSchema,
-    ForwardingProfile.LayerPostProcessor{
+    LmOutdoorSchema.OutdoorHikeSchema{
 
     final double BUFFER_SIZE = 4.0;
 
@@ -74,6 +73,7 @@ public class Hiking implements
             feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.BRUNNEL, LmTransportation.getBrunnel(sourceFeature),12);
             feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.ONEWAY, LmTransportation.getOneWay(sourceFeature.getTag(
                 OsmTags.ONEWAY)),14);
+            feat.setAttr(Fields.ROUTE_SPEC, getRouteSpecification(sourceFeature)); // "educational" or null
 
 
         } else if (sourceFeature.isPoint()) {
@@ -82,15 +82,25 @@ public class Hiking implements
 
                 var feat = collector.point(LAYER_NAME);
                 feat.setBufferPixels(BUFFER_SIZE);
-                feat.setMinZoom(14);
+                feat.setMinZoom(12);
                 feat.setAttr("network_type", sourceFeature.getString("network:type"));
                 feat.setAttr(Fields.RWN_REF, sourceFeature.getString("rwn_ref"));
             }
         }
     }
 
-    @Override
-    public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-        return LmUtils.mergeTransportationLines(zoom, BUFFER_SIZE, items, config);
+    /**
+     * Check if the source feature is educational route and return the route specification.
+     * @param sourceFeature source feature to check
+     * @return route specification "educational" or null if not applicable
+     */
+    private Object getRouteSpecification(SourceFeature sourceFeature) {
+        return IS_EDUCATIONAL_EXPRESSION.evaluate(sourceFeature) ? "educational" : null;
     }
+
+//  Do not merge hiking lines because it cause incorrect offset of hiking lines in the map.
+//    @Override
+//    public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+//        return LmUtils.mergeTransportationLines(zoom, BUFFER_SIZE, items, config);
+//    }
 }

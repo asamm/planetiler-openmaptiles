@@ -1,12 +1,13 @@
 package org.openmaptiles.addons.layers;
 
 import static org.openmaptiles.util.Utils.coalesce;
+import static org.openmaptiles.util.Utils.nullIfLong;
 
 import com.onthegomap.planetiler.FeatureCollector;
-import com.onthegomap.planetiler.FeatureMerge;
 import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
@@ -18,7 +19,6 @@ import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
 import org.openmaptiles.addons.LmUtils;
 import org.openmaptiles.addons.OsmTags;
-import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.util.Utils;
 
 public class LmTransportation implements Layer,
@@ -29,6 +29,7 @@ public class LmTransportation implements Layer,
     private static final double BUFFER_SIZE = 4.0;
 
     private static final String LAYER_NAME = "lm_transportation";
+
 
     private static final Set<String> ACCESS_NO_VALUES = Set.of(
         "private", "no"
@@ -41,20 +42,15 @@ public class LmTransportation implements Layer,
         .put(11, 200)
         .put(11, 100);
 
-    /**
-     * Config option to process tracks and track type in LoMaps style
-     */
-    private final boolean processLoMapsTracks;
+    private final MultiExpression.Index<String> assistedTrailMapping;
 
     private final PlanetilerConfig config;
 
     public LmTransportation(Translations translations, PlanetilerConfig config, Stats stats) {
-        this.processLoMapsTracks = config.arguments().getBoolean(
-            "lomaps_add_tracks",
-            "LoMaps Transportation: add tracks and tracktypes (because tracktype is missing in OpenMapTiles)",
-            false);
 
         this.config = config;
+
+        this.assistedTrailMapping = LmOutdoorSchema.LmTrasportationSchema.ASSISTED_TRAIL_MAPPING.index();
     }
 
     @Override
@@ -66,11 +62,13 @@ public class LmTransportation implements Layer,
     public void processAllOsm(SourceFeature sourceFeature, FeatureCollector features) {
 
         boolean is_via_ferrata = IS_VIA_FERRATA_EXPRESSION.evaluate(sourceFeature);
+        boolean is_path = IS_PATH_EXPRESSION.evaluate(sourceFeature);
+        boolean is_track = IS_TRACK_EXPRESSION.evaluate(sourceFeature);
 
         // Check if the source feature can be a line and if it is either a via ferrata or a track
         // (when processLoMapsTracks is enabled in configuration)
         if (sourceFeature.canBeLine() &&
-            (is_via_ferrata ||  (this.processLoMapsTracks && IS_TRACK_EXPRESSION.evaluate(sourceFeature)))) {
+            (is_via_ferrata || is_path || IS_TRACK_EXPRESSION.evaluate(sourceFeature))) {
 
             FeatureCollector.Feature feat = features.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
@@ -78,13 +76,26 @@ public class LmTransportation implements Layer,
             feat.setAttr(Fields.CLASS, sourceFeature.getTag(OsmTags.HIGHWAY));
             feat.setAttr(Fields.ACCESS, getAccess(sourceFeature.getTag(OsmTags.ACCESS)));
             feat.setAttr(Fields.ONEWAY, getOneWay(sourceFeature.getTag(OsmTags.ONEWAY)));
-            feat.setAttr(Fields.TRACKTYPE, sourceFeature.getTag(OsmTags.TRACKTYPE));
             feat.setAttr(Fields.BRUNNEL, getBrunnel(sourceFeature));
+            feat.setAttrWithMinzoom(Fields.LAYER, nullIfLong(sourceFeature.getLong("layer"), 0), 9);
 
+            if (is_track){
+                feat.setAttr(Fields.TRACKTYPE, sourceFeature.getTag(OsmTags.TRACKTYPE));
+                // TODO consider set tracktype as subclass
+                // feat.setAttr(Fields.SUBCLASS, "track");
+
+            }
+            feat.setAttr(Fields.TRACKTYPE, sourceFeature.getTag(OsmTags.TRACKTYPE));
             if (is_via_ferrata){
                 feat.setMinZoom(13);
                 feat.setAttr(Fields.VIA_FERRATA_SCALE, sourceFeature.getString(Fields.VIA_FERRATA_SCALE));
-                feat.setAttr(Fields.SUBCLASS, sourceFeature.getTag(OsmTags.HIGHWAY));
+                feat.setAttr(Fields.SUBCLASS, "via_ferrata");
+            }
+
+            if (is_path){
+                feat.setAttr(Fields.SUBCLASS, "path");
+                feat.setAttrWithMinzoom(Fields.ASSISTED_TRAIL, this.assistedTrailMapping.getOrElse(sourceFeature, null), 14 );
+                feat.setAttrWithMinzoom(Fields.TRAIL_VISIBILITY, sourceFeature.getString(Fields.TRAIL_VISIBILITY), 14);
             }
         }
     }
