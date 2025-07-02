@@ -48,7 +48,7 @@ public abstract class AbstractLayerTest {
     var actualList = StreamSupport.stream(actual.spliterator(), false)
       .sorted(Comparator.comparing(FeatureCollector.Feature::getLayer))
       .toList();
-    assertEquals(expectedList.size(), actualList.size(), () -> "size: " + actualList);
+    assertEquals(expectedList.size(), actualList.size(), () -> "Actual List: " + actualList + "\nExpected List: " + expectedList);
     for (int i = 0; i < expectedList.size(); i++) {
       assertSubmap(expectedList.get(i), TestUtils.toMap(actualList.get(i), zoom));
     }
