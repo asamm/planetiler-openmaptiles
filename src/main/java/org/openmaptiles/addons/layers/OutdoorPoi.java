@@ -1,5 +1,7 @@
 package org.openmaptiles.addons.layers;
 
+import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorBarrierSchema.Fields.CLASS_BARRIER;
+
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
@@ -73,6 +75,11 @@ public class OutdoorPoi implements Layer,
      * @return the sub class value or null if the feature doesn't fit sub class
      */
     private String getSubClassValue(String classValue, SourceFeature feature) {
+
+        if (classValue == CLASS_BARRIER) {
+            // get value of barrier tag;
+            return feature.getString("barrier");
+        }
 
         if (CLASSES_WITH_SUBCLASSES.contains(classValue)) {
             return subClassMapping.getOrElse(feature, null);

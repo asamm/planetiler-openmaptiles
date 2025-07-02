@@ -1,5 +1,7 @@
 package org.openmaptiles.addons.layers;
 
+import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_BITS;
+import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorHikeSchema.IS_PARKING_EXPRESSION;
 import static org.openmaptiles.util.Utils.coalesce;
 import static org.openmaptiles.util.Utils.nullIfLong;
 
@@ -8,8 +10,10 @@ import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
+import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
 import java.util.List;
@@ -19,6 +23,8 @@ import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
 import org.openmaptiles.addons.LmUtils;
 import org.openmaptiles.addons.OsmTags;
+import org.openmaptiles.generated.OpenMapTilesSchema;
+import org.openmaptiles.util.OmtLanguageUtils;
 import org.openmaptiles.util.Utils;
 
 public class LmTransportation implements Layer,
@@ -64,6 +70,7 @@ public class LmTransportation implements Layer,
         boolean is_via_ferrata = IS_VIA_FERRATA_EXPRESSION.evaluate(sourceFeature);
         boolean is_path = IS_PATH_EXPRESSION.evaluate(sourceFeature);
         boolean is_track = IS_TRACK_EXPRESSION.evaluate(sourceFeature);
+        boolean is_parking = IS_PARKING_EXPRESSION.evaluate(sourceFeature);
 
         // Check if the source feature can be a line and if it is either a via ferrata or a track
         // (when processLoMapsTracks is enabled in configuration)
@@ -97,6 +104,15 @@ public class LmTransportation implements Layer,
                 feat.setAttrWithMinzoom(Fields.ASSISTED_TRAIL, this.assistedTrailMapping.getOrElse(sourceFeature, null), 14 );
                 feat.setAttrWithMinzoom(Fields.TRAIL_VISIBILITY, sourceFeature.getString(Fields.TRAIL_VISIBILITY), 14);
             }
+        }
+
+        if (is_parking && sourceFeature.canBePolygon()){
+            FeatureCollector.Feature feat = features.polygon(LAYER_NAME);
+            feat.setBufferPixels(BUFFER_SIZE);
+            feat.setMinZoom(14);
+            feat.setAttr(Fields.CLASS, "parking");
+            feat.setAttr(Fields.ACCESS, getAccess(sourceFeature.getTag(OsmTags.ACCESS)));
+            // name of parking lot is part of OpenMapTilesSchema
         }
     }
 

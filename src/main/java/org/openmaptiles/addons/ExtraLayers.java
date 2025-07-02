@@ -5,6 +5,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import org.openmaptiles.Layer;
+import org.openmaptiles.addons.layers.Barrier;
 import org.openmaptiles.addons.layers.Contour;
 import org.openmaptiles.addons.layers.Cycling;
 import org.openmaptiles.addons.layers.Hiking;
@@ -21,6 +22,7 @@ public class ExtraLayers {
     public static List<Layer> create(Translations translations, PlanetilerConfig config, Stats stats) {
         return List.of(
             // Create classes that extend Layer interface in the addons package, then instantiate them here
+            new Barrier(translations, config, stats),
             new Hiking(translations, config, stats),
             new Cycling(translations, config, stats),
             new Contour(translations, config, stats),

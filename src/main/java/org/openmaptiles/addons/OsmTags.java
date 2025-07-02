@@ -83,7 +83,8 @@ final public class OsmTags {
     /** generator type (PWR, horizontal_axis, francis_turbine, etc.): https://wiki.openstreetmap.org/wiki/Key:generator:type */
     public static final String GENERATOR_TYPE = "generator:type";
 
-    /** fireplace areas (e.g., campfire pits): https://wiki.openstreetmap.org/wiki/Tag:tourism=camp_site#Fireplace */
+    /** fireplace areas (e.g., campfire pits): https://wiki.openstreetmap.org/wiki/Tag:tourism= camp_site#Fireplace */
     public static final String FIREPLACE = "fireplace";
+    public static final String NAME = "name";
 }
 

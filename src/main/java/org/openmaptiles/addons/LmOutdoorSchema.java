@@ -15,7 +15,7 @@ public class LmOutdoorSchema {
 
     static class SchemaFields {
         public static final String CLASS = "class";
-        public static final String SUBCLASS = "subclass";;
+        public static final String  SUBCLASS = "subclass";
     }
 
     public interface LmTrasportationSchema {
@@ -110,7 +110,9 @@ public class LmOutdoorSchema {
             MultiExpression.entry("caravan_site", Expression.matchAny("tourism", "caravan_site")),
             MultiExpression.entry("bunker", Expression.matchAny("military", "bunker")),
             MultiExpression.entry("stone", Expression.matchAny("natural", "stone")),
-            MultiExpression.entry("rock", Expression.matchAny("natural", "rock"))
+            MultiExpression.entry("rock", Expression.matchAny("natural", "rock")),
+            MultiExpression.entry(OutdoorBarrierSchema.Fields.CLASS_BARRIER, Expression.matchAny("barrier",
+                "bollard","cycle_barrier","gate","kissing_gate","lift_gate","swing_gate","stile","turnstile","full-height_turnstile"))
         ));
 
         MultiExpression<String> OUTDOOR_POI_SUBCLASS_MAPPING = MultiExpression.of(List.of(
@@ -173,6 +175,7 @@ public class LmOutdoorSchema {
             MultiExpression.entry("avalanche_dam", Expression.matchAny("avalanche_protection", "dam")),
             MultiExpression.entry("fence", Expression.matchAny("man_made", "snow_fence")),
             MultiExpression.entry("net", (Expression.matchAny("man_made", "snow_net")))
+
         ));
 
         // these classes have sub-classes that should be included in the output
@@ -204,6 +207,7 @@ public class LmOutdoorSchema {
         Expression IS_EDUCATIONAL_EXPRESSION = or(
             Expression.matchAny("educational", "yes", "1"),
             Expression.matchAny("osmc:symbol", "green:white:green_backslash"));
+        Expression IS_PARKING_EXPRESSION = Expression.matchAny("amenity", "parking");
 
         MultiExpression<String> LM_HIGHWAY_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry("motorway", or(
@@ -229,7 +233,8 @@ public class LmOutdoorSchema {
                 matchAny("highway", "track"))),
             MultiExpression.entry("path", or(
                 matchAny("lm_highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata"),
-                matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata")))
+                matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata"))),
+            MultiExpression.entry("parking", IS_PARKING_EXPRESSION)
         ));
     }
 
@@ -290,5 +295,28 @@ public class LmOutdoorSchema {
         Expression IS_POWER_GENERATOR_EXPRESSION = Expression.matchAny("power", "generator", "plant", "substation");
 
         Expression IS_MINOR_LINE_POLE_EXPRESSION = Expression.matchAny("power", "minor_line", "pole");
+    }
+
+
+    public interface OutdoorBarrierSchema {
+
+        final class Fields extends SchemaFields {
+            public static final String CLASS_BARRIER = "barrier" ;
+            public static final String CLASS_PIPELINE = "pipeline" ;
+            public static final String GOODS_CONVEYOR = "goods_conveyor" ;
+            public static final String CLASS_EMBANKMENT = "embankment" ;
+        }
+
+        MultiExpression<String> BARRIER_CLASS_MAPPING = MultiExpression.of(List.of(
+            MultiExpression.entry(Fields.CLASS_BARRIER, Expression.matchAny("barrier",
+                "city_wall","chain","ditch","fence","hedge","retaining_wall","stile","wall")),
+            MultiExpression.entry(Fields.CLASS_PIPELINE,
+                and(
+                    Expression.matchAny("man_made", "pipeline"),
+                    Expression.matchAny("location", "overground","overhead")
+                )),
+            MultiExpression.entry(Fields.GOODS_CONVEYOR, Expression.matchAny("man_made", "goods_conveyor")),
+            MultiExpression.entry(Fields.CLASS_EMBANKMENT, Expression.matchAny("man_made", "embankment"))
+        ));
     }
 }
