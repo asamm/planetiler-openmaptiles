@@ -309,7 +309,7 @@ public class LmOutdoorSchema {
 
         MultiExpression<String> BARRIER_CLASS_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry(Fields.CLASS_BARRIER, Expression.matchAny("barrier",
-                "city_wall","chain","ditch","fence","hedge","retaining_wall","stile","wall")),
+                "city_wall","chain","ditch","fence","hedge","retaining_wall","wall")),
             MultiExpression.entry(Fields.CLASS_PIPELINE,
                 and(
                     Expression.matchAny("man_made", "pipeline"),
