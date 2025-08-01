@@ -2,11 +2,6 @@ package org.openmaptiles.addons.layers;
 
 import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorBarrierSchema.BARRIER_CLASS_MAPPING;
 import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorBarrierSchema.Fields.CLASS_BARRIER;
-import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorCyclingSchema;
-import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorHikeSchema;
-import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorPowerSchema.IS_MINOR_LINE_POLE_EXPRESSION;
-import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorPowerSchema.IS_POWER_GENERATOR_EXPRESSION;
-import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorPowerSchema.POWER_CLASS_MAPPING;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -20,8 +15,7 @@ import org.openmaptiles.addons.LmOutdoorSchema;
 
 public class Barrier implements
     Layer,
-    OpenMapTilesProfile.OsmAllProcessor
-    {
+    OpenMapTilesProfile.OsmAllProcessor {
 
     final double BUFFER_SIZE = 4.0;
 
@@ -48,12 +42,16 @@ public class Barrier implements
             return;
         }
 
-        var feat = collector.line(LAYER_NAME);
-        feat.setBufferPixels(BUFFER_SIZE);
-        feat.setMinZoom(DEF_MIN_ZOOM);
-        feat.setAttr(LmOutdoorSchema.OutdoorBarrierSchema.Fields.CLASS, classValue);
-        feat.setAttr(LmOutdoorSchema.OutdoorBarrierSchema.Fields.SUBCLASS, getSubClassValue(classValue, sourceFeature));
-
+        if (sourceFeature.canBeLine() || sourceFeature.canBePolygon()) {
+            var feat = collector.line(LAYER_NAME);
+            feat.setBufferPixels(BUFFER_SIZE);
+            feat.setMinZoom(DEF_MIN_ZOOM);
+            feat.setAttr(LmOutdoorSchema.OutdoorBarrierSchema.Fields.CLASS, classValue);
+            feat.setAttr(LmOutdoorSchema.OutdoorBarrierSchema.Fields.SUBCLASS,
+                getSubClassValue(classValue, sourceFeature));
+            feat.setAttr(LmOutdoorSchema.LmTrasportationSchema.Fields.BRUNNEL,
+                LmTransportation.getBrunnel(sourceFeature));
+        }
     }
 
     /**
