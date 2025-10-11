@@ -2,6 +2,8 @@ package org.openmaptiles.addons.layers;
 
 import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorSkiSchema.SKI_CLASS_MAPPING;
 import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorSkiSchema.SKI_SUBCLASS_MAPPING;
+import static org.openmaptiles.addons.layers.LmTransportation.getBrunnel;
+import static org.openmaptiles.addons.layers.LmTransportation.getOneWay;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -12,6 +14,7 @@ import com.onthegomap.planetiler.util.Translations;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.addons.OsmTags;
 import org.openmaptiles.util.OmtLanguageUtils;
 import org.slf4j.LoggerFactory;
 
@@ -74,14 +77,42 @@ public class Ski implements Layer,
         // original value for piste:grooming tag
         feat.setAttr(Fields.GROOMING, sourceFeature.getString("piste:grooming"));
 
-        // original boolean value for lit tag or piste:lit tag if lit tag is not present
-        if (sourceFeature.hasTag("lit")) {
-            feat.setAttr(Fields.LIT, sourceFeature.getBoolean("lit"));
-        } else {
-            feat.setAttr(Fields.LIT, sourceFeature.getBoolean("piste:lit"));
+        // for lines check for brunnel and oneway and lit
+        if (sourceFeature.canBeLine()){
+            feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.BRUNNEL, getBrunnel(sourceFeature),14);
+            feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.ONEWAY, getPisteOneWay(sourceFeature), 14);
+            feat.setAttrWithMinzoom(Fields.LIT, getLit(sourceFeature), 14);
         }
 
         feat.setMinZoom(getZoomLevel(classValue));
+    }
+
+    /**
+     * Get the lit value for piste features. First check the lit tag and if not present check the piste:lit tag.
+     * @param sourceFeature the source feature
+     * @return true if lit, false if not lit, null if not applicable
+     */
+    private Object getLit(SourceFeature sourceFeature) {
+        // original boolean value for lit tag or piste:lit tag if lit tag is not present
+        if (sourceFeature.hasTag("lit")) {
+            return sourceFeature.getBoolean("lit");
+        }
+        return sourceFeature.getBoolean("piste:lit");
+    }
+
+    /**
+     * Get the one way value for piste features. First check the piste specific oneway tag and if not present
+     * check the general oneway tag.
+     * @param sourceFeature the source feature
+     * @return 1 for one way, -1 for one way against the direction, 0 for not one way or null if not applicable
+     */
+    private Integer getPisteOneWay(SourceFeature sourceFeature) {
+
+        if (sourceFeature.hasTag(OsmTags.ONEWAY_PISTE)) {
+            return getOneWay(sourceFeature.getTag(OsmTags.ONEWAY_PISTE));
+        }
+
+        return getOneWay(sourceFeature.getTag(OsmTags.ONEWAY));
     }
 
     /**
@@ -116,7 +147,7 @@ public class Ski implements Layer,
             case "downhill":
                 return 12;
             default:
-                return 14;
+                return 12;
         }
     }
 }

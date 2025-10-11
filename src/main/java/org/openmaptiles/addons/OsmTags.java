@@ -22,6 +22,9 @@ final public class OsmTags {
     /** oneway: https://wiki.openstreetmap.org/wiki/Key:oneway */
     public static final String ONEWAY = "oneway";
 
+    /** oneway:piste: https://wiki.openstreetmap.org/wiki/Key:oneway:piste */
+    public static final String ONEWAY_PISTE = "piste:oneway";
+
     /** tracktype: https://wiki.openstreetmap.org/wiki/Key:tracktype */
     public static final String TRACKTYPE = "tracktype";
 
