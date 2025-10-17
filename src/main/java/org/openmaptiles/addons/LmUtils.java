@@ -5,6 +5,7 @@ import static org.openmaptiles.util.Utils.coalesce;
 import com.onthegomap.planetiler.FeatureMerge;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.reader.SourceFeature;
 import java.util.List;
 import org.openmaptiles.addons.layers.LmTransportation;
 import org.openmaptiles.generated.OpenMapTilesSchema;
@@ -35,5 +36,15 @@ public class LmUtils {
             item.tags().remove(LIMIT_MERGE_TAG);
         }
         return merged;
+    }
+
+    /**
+     * Get boolean tag "yes", "1" as positive integer 1. For negative or missing values return null
+     * @param sourceFeature feature to get the tag from
+     * @param tagKey the tag key
+     * @return 1 or null if OSM tag is not parsed as true
+     */
+    public static Integer getBoolAsPositiveInt(SourceFeature sourceFeature, String tagKey) {
+        return sourceFeature.getBoolean(tagKey) ? 1 : null;
     }
 }

@@ -152,10 +152,10 @@ public class LmOutdoorSchema {
                 Expression.matchAny("landuse", "winter_sports"), and(Expression.matchAny("leisure", "sports_centre"), Expression.matchAny("sport", "ski")))),
             MultiExpression.entry("station", Expression.matchAny("aerialway", "station", "halt")),
             MultiExpression.entry("pylon", Expression.matchAny("aerialway", "pylon")),
-            MultiExpression.entry("lift", Expression.matchAny("aerialway", "chair_lift", "drag_lift", "gondola", "cable_car", "mixed-lift", "t-bar", "j-bar", "platter", "rope_tow", "magic_carpet")),
+            MultiExpression.entry("lift", Expression.matchAny("aerialway", "chair_lift", "drag_lift", "gondola", "cable_car", "mixed_lift", "mixed-lift", "t-bar", "j-bar", "platter", "rope_tow", "magic_carpet")),
             MultiExpression.entry("avalanche", or(Expression.matchAny("man_made", "snow_fence", "snow_net"),Expression.matchField("avalanche_protection"))),
             MultiExpression.entry("downhill", Expression.matchAny("piste:type", "downhill")),
-            MultiExpression.entry("nordic", Expression.matchAny("piste:type", "nordic")),
+            MultiExpression.entry("nordic", Expression.matchAny("piste:type", "nordic","nordic;hike")),
             MultiExpression.entry("skitour", Expression.matchAny("piste:type", "skitour")),
             MultiExpression.entry("playground", Expression.matchAny("piste:type", "playground")),
             MultiExpression.entry("snow_park", Expression.matchAny("piste:type", "snow_park")),
@@ -175,12 +175,22 @@ public class LmOutdoorSchema {
             MultiExpression.entry("avalanche_dam", Expression.matchAny("avalanche_protection", "dam")),
             MultiExpression.entry("fence", Expression.matchAny("man_made", "snow_fence")),
             MultiExpression.entry("net", (Expression.matchAny("man_made", "snow_net")))
-
         ));
 
         // these classes have sub-classes that should be included in the output
         Set<String> CLASSES_WITH_SUBCLASSES = new HashSet<>(Set.of("lift", "avalanche"));
 
+    }
+
+    public interface SnowmobileSchema {
+
+        final class Fields extends SchemaFields {
+            public static final String ICE_ROAD = "ice_road";
+        }
+
+        MultiExpression<String> SNOWMOBILE_CLASS_MAPPING = MultiExpression.of(List.of(
+            MultiExpression.entry("snowmobile", Expression.matchAny("snowmobile", "designated", "permissive", "yes"))
+        ));
     }
 
     public interface OutdoorHikeSchema {

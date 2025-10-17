@@ -11,9 +11,11 @@ import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
+import java.util.Map;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.addons.LmUtils;
 import org.openmaptiles.addons.OsmTags;
 import org.openmaptiles.util.OmtLanguageUtils;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,7 @@ public class Ski implements Layer,
         feat.setBufferPixels(BUFFER_SIZE);
         feat.setAttr(LmOutdoorSchema.OutdoorPoiSchema.Fields.CLASS, classValue);
         feat.setAttr(LmOutdoorSchema.OutdoorPoiSchema.Fields.SUBCLASS, subClassValue);
-        feat.putAttrs(OmtLanguageUtils.getNames(sourceFeature.tags(), translations));
+        feat.putAttrs(getPisteName(sourceFeature));
 
         // get original value of ref tag
         feat.setAttr(Fields.REF, sourceFeature.getString("ref"));
@@ -88,16 +90,32 @@ public class Ski implements Layer,
     }
 
     /**
+     * Get the names for piste features. If piste:name is present and no default name is set, use piste:name as default name.
+     * @param sourceFeature
+     * @return map of names
+     */
+    private Map<String, Object> getPisteName(SourceFeature sourceFeature) {
+
+        Map<String, Object>  names = OmtLanguageUtils.getNames(sourceFeature.tags(), translations);
+
+        if (sourceFeature.hasTag("piste:name") && !names.containsKey("name")) {
+            // add piste:name as default name
+            names.put("name", sourceFeature.getString("piste:name"));
+        }
+        return names;
+    }
+
+    /**
      * Get the lit value for piste features. First check the lit tag and if not present check the piste:lit tag.
      * @param sourceFeature the source feature
-     * @return true if lit, false if not lit, null if not applicable
+     * @return 1 for lit, null if piste without lighting
      */
-    private Object getLit(SourceFeature sourceFeature) {
+    private Integer getLit(SourceFeature sourceFeature) {
         // original boolean value for lit tag or piste:lit tag if lit tag is not present
         if (sourceFeature.hasTag("lit")) {
-            return sourceFeature.getBoolean("lit");
+            return LmUtils.getBoolAsPositiveInt(sourceFeature,"lit") ;
         }
-        return sourceFeature.getBoolean("piste:lit");
+        return LmUtils.getBoolAsPositiveInt(sourceFeature,"piste:lit");
     }
 
     /**
@@ -128,9 +146,15 @@ public class Ski implements Layer,
                 // for lift return original value of aerialway tag
                 return feature.getString("aerialway");
             }
+            if (classValue.equals("avalanche")) {
+                // for avalanche return original value of avalanche tag if present
+                return feature.getString("avalanche_protection");
+            }
+            if (classValue.equals("snowmobile")) {
+                // if
+            }
 
-            return subClassMapping.getOrElse(feature,
-                classValue.equals("avalanche") ? feature.getString("avalanche_protection") : null);
+            return subClassMapping.getOrElse(feature, null);
         }
 
         return null;

@@ -13,6 +13,7 @@ import org.openmaptiles.addons.layers.LmTransportation;
 import org.openmaptiles.addons.layers.OutdoorPoi;
 import org.openmaptiles.addons.layers.Power;
 import org.openmaptiles.addons.layers.Ski;
+import org.openmaptiles.addons.layers.Snowmobile;
 
 /**
  * Registry of extra custom layers that you can add to the openmaptiles schema.
@@ -29,7 +30,8 @@ public class ExtraLayers {
             new LmTransportation(translations, config, stats),
             new OutdoorPoi(translations, config, stats),
             new Power(translations,config,stats),
-            new Ski(translations, config, stats)
+            new Ski(translations, config, stats),
+            new Snowmobile(translations, config, stats)
         );
     }
 }
