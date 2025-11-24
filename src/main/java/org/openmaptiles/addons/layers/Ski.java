@@ -167,9 +167,9 @@ public class Ski implements Layer,
             case "ski_resort":
                 return 10;
             case "lift":
-                return 12;
             case "downhill":
-                return 12;
+            case "nordic":
+                return 11;
             default:
                 return 12;
         }
