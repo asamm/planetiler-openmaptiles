@@ -9,6 +9,8 @@ import org.openmaptiles.addons.layers.Barrier;
 import org.openmaptiles.addons.layers.Contour;
 import org.openmaptiles.addons.layers.Cycling;
 import org.openmaptiles.addons.layers.Hiking;
+import org.openmaptiles.addons.layers.GeographyName;
+import org.openmaptiles.addons.layers.LmLandcover;
 import org.openmaptiles.addons.layers.LmTransportation;
 import org.openmaptiles.addons.layers.OutdoorPoi;
 import org.openmaptiles.addons.layers.Power;
@@ -31,7 +33,9 @@ public class ExtraLayers {
             new OutdoorPoi(translations, config, stats),
             new Power(translations,config,stats),
             new Ski(translations, config, stats),
-            new Snowmobile(translations, config, stats)
+            new Snowmobile(translations, config, stats),
+            new LmLandcover(translations, config, stats),
+            new GeographyName(translations, config, stats)
         );
     }
 }

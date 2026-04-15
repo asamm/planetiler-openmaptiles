@@ -1,9 +1,7 @@
 package org.openmaptiles.addons;
 
-import static com.onthegomap.planetiler.expression.Expression.and;
-import static com.onthegomap.planetiler.expression.Expression.matchAny;
-import static com.onthegomap.planetiler.expression.Expression.matchField;
-import static com.onthegomap.planetiler.expression.Expression.or;
+import static com.onthegomap.planetiler.expression.Expression.*;
+import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorLmLandcoverSchema.Fields.LANDTYPE;
 
 import com.onthegomap.planetiler.expression.Expression;
 import com.onthegomap.planetiler.expression.MultiExpression;
@@ -14,13 +12,15 @@ import java.util.Set;
 public class LmOutdoorSchema {
 
     static class SchemaFields {
+
         public static final String CLASS = "class";
-        public static final String  SUBCLASS = "subclass";
+        public static final String SUBCLASS = "subclass";
     }
 
     public interface LmTrasportationSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String ONEWAY = "oneway";
             public static final String ACCESS = "access";
             public static final String TRACKTYPE = "tracktype";
@@ -50,7 +50,7 @@ public class LmOutdoorSchema {
             MultiExpression.entry("yes", Expression.matchAny("assisted_trail", "yes")),
             MultiExpression.entry("rope",
                 or(
-                    Expression.matchAny("assisted_trail", "ropes", "iron_ropes","rope","iron_cable"),
+                    Expression.matchAny("assisted_trail", "ropes", "iron_ropes", "rope", "iron_cable"),
                     Expression.matchField("safety_rope")
                 )),
             MultiExpression.entry("ladder",
@@ -112,7 +112,8 @@ public class LmOutdoorSchema {
             MultiExpression.entry("stone", Expression.matchAny("natural", "stone")),
             MultiExpression.entry("rock", Expression.matchAny("natural", "rock")),
             MultiExpression.entry(OutdoorBarrierSchema.Fields.CLASS_BARRIER, Expression.matchAny("barrier",
-                "bollard","cycle_barrier","gate","kissing_gate","lift_gate","swing_gate","stile","turnstile","full-height_turnstile"))
+                "bollard", "cycle_barrier", "gate", "kissing_gate", "lift_gate", "swing_gate", "stile", "turnstile",
+                "full-height_turnstile"))
         ));
 
         MultiExpression<String> OUTDOOR_POI_SUBCLASS_MAPPING = MultiExpression.of(List.of(
@@ -132,15 +133,17 @@ public class LmOutdoorSchema {
             MultiExpression.entry("shelter_public_transport", Expression.matchAny("shelter_type", "public_transport")),
             MultiExpression.entry("caravan_site", Expression.matchAny("tourism", "caravan_site")),
             MultiExpression.entry("pillbox", Expression.matchAny("bunker_type", "pillbox"))
-            ));
+        ));
 
         // these classes have sub-classes that should be included in the output
-        Set<String> CLASSES_WITH_SUBCLASSES = new HashSet<>(Set.of("shelter", "hut", "spring", "tourism", "rental", "bunker"));
+        Set<String> CLASSES_WITH_SUBCLASSES = new HashSet<>(
+            Set.of("shelter", "hut", "spring", "tourism", "rental", "bunker"));
     }
 
     public interface OutdoorSkiSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String REF = "ref";
             public static final String DIFFICULTY = "difficulty";
             public static final String GROOMING = "grooming";
@@ -149,13 +152,17 @@ public class LmOutdoorSchema {
 
         MultiExpression<String> SKI_CLASS_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry("ski_resort", or(
-                Expression.matchAny("landuse", "winter_sports"), and(Expression.matchAny("leisure", "sports_centre"), Expression.matchAny("sport", "ski")))),
+                Expression.matchAny("landuse", "winter_sports"),
+                and(Expression.matchAny("leisure", "sports_centre"), Expression.matchAny("sport", "ski")))),
             MultiExpression.entry("station", Expression.matchAny("aerialway", "station", "halt")),
             MultiExpression.entry("pylon", Expression.matchAny("aerialway", "pylon")),
-            MultiExpression.entry("lift", Expression.matchAny("aerialway", "chair_lift", "drag_lift", "gondola", "cable_car", "mixed_lift", "mixed-lift", "t-bar", "j-bar", "platter", "rope_tow", "magic_carpet")),
-            MultiExpression.entry("avalanche", or(Expression.matchAny("man_made", "snow_fence", "snow_net"),Expression.matchField("avalanche_protection"))),
+            MultiExpression.entry("lift",
+                Expression.matchAny("aerialway", "chair_lift", "drag_lift", "gondola", "cable_car", "mixed_lift",
+                    "mixed-lift", "t-bar", "j-bar", "platter", "rope_tow", "magic_carpet")),
+            MultiExpression.entry("avalanche", or(Expression.matchAny("man_made", "snow_fence", "snow_net"),
+                Expression.matchField("avalanche_protection"))),
             MultiExpression.entry("downhill", Expression.matchAny("piste:type", "downhill")),
-            MultiExpression.entry("nordic", Expression.matchAny("piste:type", "nordic","nordic;hike")),
+            MultiExpression.entry("nordic", Expression.matchAny("piste:type", "nordic", "nordic;hike")),
             MultiExpression.entry("skitour", Expression.matchAny("piste:type", "skitour")),
             MultiExpression.entry("playground", Expression.matchAny("piste:type", "playground")),
             MultiExpression.entry("snow_park", Expression.matchAny("piste:type", "snow_park")),
@@ -185,6 +192,7 @@ public class LmOutdoorSchema {
     public interface SnowmobileSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String ICE_ROAD = "ice_road";
         }
 
@@ -196,6 +204,7 @@ public class LmOutdoorSchema {
     public interface OutdoorHikeSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String REF = "ref";
             public static final String NETWORK = "network";
             public static final String HIGHWAY = "highway";
@@ -211,7 +220,7 @@ public class LmOutdoorSchema {
         // Accepts features where "route" is "hiking" or "foot", and either "osmc:symbol" or "network" field is defined.
         Expression IS_HIKE_EXPRESSION = and(
             matchAny("route", "hiking", "foot"),
-            or (matchField("osmc:symbol"), matchField("network"))
+            or(matchField("osmc:symbol"), matchField("network"))
         );
 
         Expression IS_EDUCATIONAL_EXPRESSION = or(
@@ -242,8 +251,10 @@ public class LmOutdoorSchema {
                 matchAny("lm_highway", "track"),
                 matchAny("highway", "track"))),
             MultiExpression.entry("path", or(
-                matchAny("lm_highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata"),
-                matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "via_ferrata"))),
+                matchAny("lm_highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor",
+                    "via_ferrata"),
+                matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor",
+                    "via_ferrata"))),
             MultiExpression.entry("parking", IS_PARKING_EXPRESSION)
         ));
     }
@@ -251,6 +262,7 @@ public class LmOutdoorSchema {
     public interface OutdoorCyclingSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String MTB_SCALE = "mtb_scale";
 
             public static final String RCN_REF = "rcn_ref";
@@ -288,7 +300,7 @@ public class LmOutdoorSchema {
         final class Fields extends SchemaFields {
 
             public static final String POWER = "power   ";
-            public static final String NAME = "name" ;
+            public static final String NAME = "name";
         }
 
         MultiExpression<String> POWER_CLASS_MAPPING = MultiExpression.of(List.of(
@@ -311,22 +323,79 @@ public class LmOutdoorSchema {
     public interface OutdoorBarrierSchema {
 
         final class Fields extends SchemaFields {
-            public static final String CLASS_BARRIER = "barrier" ;
-            public static final String CLASS_PIPELINE = "pipeline" ;
-            public static final String GOODS_CONVEYOR = "goods_conveyor" ;
-            public static final String CLASS_EMBANKMENT = "embankment" ;
+
+            public static final String CLASS_BARRIER = "barrier";
+            public static final String CLASS_PIPELINE = "pipeline";
+            public static final String GOODS_CONVEYOR = "goods_conveyor";
+            public static final String CLASS_EMBANKMENT = "embankment";
         }
 
         MultiExpression<String> BARRIER_CLASS_MAPPING = MultiExpression.of(List.of(
             MultiExpression.entry(Fields.CLASS_BARRIER, Expression.matchAny("barrier",
-                "city_wall","chain","ditch","fence","hedge","retaining_wall","wall")),
+                "city_wall", "chain", "ditch", "fence", "hedge", "retaining_wall", "wall")),
             MultiExpression.entry(Fields.CLASS_PIPELINE,
                 and(
                     Expression.matchAny("man_made", "pipeline"),
-                    Expression.matchAny("location", "overground","overhead")
+                    Expression.matchAny("location", "overground", "overhead")
                 )),
             MultiExpression.entry(Fields.GOODS_CONVEYOR, Expression.matchAny("man_made", "goods_conveyor")),
             MultiExpression.entry(Fields.CLASS_EMBANKMENT, Expression.matchAny("man_made", "embankment"))
+        ));
+    }
+
+    // LM LANDCOVER
+
+    public interface OutdoorLmLandcoverSchema {
+
+        final class Fields extends SchemaFields {
+
+            public static final String CLASS = "class";
+            public static final String LANDTYPE = "landtype";
+        }
+
+        Expression IS_LANDTYPE_EXPRESSION = and(Expression.matchField(LANDTYPE),
+            not(Expression.matchAny(LANDTYPE, "water")));
+
+    }
+
+    // GEOGRAPHY NAMES
+
+    public interface OutdoorGeographyNamesSchema {
+
+        final class Fields extends SchemaFields {
+            public static final String RANK = "rank";
+        }
+
+        MultiExpression<String> GEOGRAPHY_NAMES_CLASS_MAPPING = MultiExpression.of(List.of(
+            MultiExpression.entry("marine", Expression.matchAny("geography_marine", "yes")),
+            MultiExpression.entry("region", Expression.matchAny("geography_regions", "yes"))
+        ));
+
+        MultiExpression<String> GEOGRAPHY_NAMES_SUBCLASS_MAPPING = MultiExpression.of(List.of(
+            // marine
+            MultiExpression.entry("bay", Expression.matchAny("type", "bay", "gulf", "sound")),
+            MultiExpression.entry("fjord", Expression.matchAny("type", "fjord ", "inlet")),
+            MultiExpression.entry("lagoon", Expression.matchAny("type", "lagoon")),
+            MultiExpression.entry("ocean", Expression.matchAny("type", "ocean")),
+            MultiExpression.entry("reef", Expression.matchAny("type", "reef")),
+            MultiExpression.entry("sea", Expression.matchAny("type", "sea", "generic")),
+            MultiExpression.entry("channel", Expression.matchAny("type", "channel")),
+            MultiExpression.entry("strait", Expression.matchAny("type", "strait")),
+
+            // regions
+            MultiExpression.entry("basin", Expression.matchAny("type", "Basin", "Depression")),
+            MultiExpression.entry("coast", Expression.matchAny("type", "Coast")),
+            MultiExpression.entry("continent", Expression.matchAny("type", "Continent")),
+            MultiExpression.entry("delta", Expression.matchAny("type", "Delta")),
+            MultiExpression.entry("geoarea", Expression.matchAny("type", "Geoarea", "Isthmus", "Range/mtn")),
+            MultiExpression.entry("island", Expression.matchAny("type", "Island", "Island group")),
+            MultiExpression.entry("lowland", Expression.matchAny("type", "Lowland")),
+            MultiExpression.entry("cape", Expression.matchAny("type", "Pen/cape")),
+            MultiExpression.entry("peninsula", Expression.matchAny("type", "Peninsula")),
+            MultiExpression.entry("plain", Expression.matchAny("type", "Plain")),
+            MultiExpression.entry("plateau", Expression.matchAny("type", "Plateau")),
+            MultiExpression.entry("valley", Expression.matchAny("type", "Valley")),
+            MultiExpression.entry("wetlands", Expression.matchAny("type", "Wetlands"))
         ));
     }
 }
