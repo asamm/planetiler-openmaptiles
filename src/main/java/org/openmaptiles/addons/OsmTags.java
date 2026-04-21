@@ -89,5 +89,10 @@ final public class OsmTags {
     /** fireplace areas (e.g., campfire pits): https://wiki.openstreetmap.org/wiki/Tag:tourism= camp_site#Fireplace */
     public static final String FIREPLACE = "fireplace";
     public static final String NAME = "name";
-}
 
+    // LOW ZOOM OVERVIEW MAP TAGS
+    public static final String NE_MIN_ZOOM = "ne_min_zoom";
+    public static final String NE_MAX_ZOOM = "ne_max_zoom";
+    public static final String RANK = "rank";
+    public static final String NE_LANDTYPE = "ne_landtype";
+}

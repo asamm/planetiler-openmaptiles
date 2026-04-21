@@ -1,7 +1,6 @@
 package org.openmaptiles.addons;
 
 import static com.onthegomap.planetiler.expression.Expression.*;
-import static org.openmaptiles.addons.LmOutdoorSchema.OutdoorLmLandcoverSchema.Fields.LANDTYPE;
 
 import com.onthegomap.planetiler.expression.Expression;
 import com.onthegomap.planetiler.expression.MultiExpression;
@@ -65,6 +64,7 @@ public class LmOutdoorSchema {
     public interface OutdoorPoiSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String ELE = "ele";
         }
 
@@ -350,11 +350,10 @@ public class LmOutdoorSchema {
         final class Fields extends SchemaFields {
 
             public static final String CLASS = "class";
-            public static final String LANDTYPE = "landtype";
         }
 
-        Expression IS_LANDTYPE_EXPRESSION = and(Expression.matchField(LANDTYPE),
-            not(Expression.matchAny(LANDTYPE, "water")));
+        Expression IS_LANDTYPE_EXPRESSION = and(Expression.matchField("ne_landtype"),
+            not(Expression.matchAny("ne_landtype", "water")));
 
     }
 
@@ -363,12 +362,13 @@ public class LmOutdoorSchema {
     public interface OutdoorGeographyNamesSchema {
 
         final class Fields extends SchemaFields {
+
             public static final String RANK = "rank";
         }
 
         MultiExpression<String> GEOGRAPHY_NAMES_CLASS_MAPPING = MultiExpression.of(List.of(
-            MultiExpression.entry("marine", Expression.matchAny("geography_marine", "yes")),
-            MultiExpression.entry("region", Expression.matchAny("geography_regions", "yes"))
+            MultiExpression.entry("marine", Expression.matchAny("ne_geography_marine", "yes")),
+            MultiExpression.entry("region", Expression.matchAny("ne_geography_regions", "yes"))
         ));
 
         MultiExpression<String> GEOGRAPHY_NAMES_SUBCLASS_MAPPING = MultiExpression.of(List.of(
@@ -387,6 +387,7 @@ public class LmOutdoorSchema {
             MultiExpression.entry("coast", Expression.matchAny("type", "Coast")),
             MultiExpression.entry("continent", Expression.matchAny("type", "Continent")),
             MultiExpression.entry("delta", Expression.matchAny("type", "Delta")),
+            MultiExpression.entry("desert", Expression.matchAny("type", "Desert")),
             MultiExpression.entry("geoarea", Expression.matchAny("type", "Geoarea", "Isthmus", "Range/mtn")),
             MultiExpression.entry("island", Expression.matchAny("type", "Island", "Island group")),
             MultiExpression.entry("lowland", Expression.matchAny("type", "Lowland")),

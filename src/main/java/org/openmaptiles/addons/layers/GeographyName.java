@@ -9,6 +9,7 @@ import com.onthegomap.planetiler.util.Translations;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.addons.OsmTags;
 import org.openmaptiles.util.OmtLanguageUtils;
 
 /**
@@ -18,7 +19,7 @@ public class GeographyName implements
     Layer,
     OpenMapTilesProfile.OsmAllProcessor {
 
-    final double BUFFER_SIZE = 256.0;
+    final double BUFFER_SIZE = 128.0;
 
     final String LAYER_NAME = "geography_name";
 
@@ -49,14 +50,14 @@ public class GeographyName implements
         if (sourceFeature.canBeLine()) {
             var feat = collector.line(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setMinZoom((int) sourceFeature.getLong("ne_min_zoom"));
-            feat.setMaxZoom((int) sourceFeature.getLong("ne_max_zoom"));
+            feat.setMinZoom((int) sourceFeature.getLong(OsmTags.NE_MIN_ZOOM));
+            feat.setMaxZoom((int) sourceFeature.getLong(OsmTags.NE_MAX_ZOOM));
             feat.setAttr(LmOutdoorSchema.OutdoorGeographyNamesSchema.Fields.CLASS, classValue);
             feat.setAttr(
                 LmOutdoorSchema.OutdoorGeographyNamesSchema.Fields.SUBCLASS,
                 geographySubClassMapping.getOrElse(sourceFeature, null));
 
-            feat.setAttr(LmOutdoorSchema.OutdoorGeographyNamesSchema.Fields.RANK, sourceFeature.getLong("rank"));
+            feat.setAttr(LmOutdoorSchema.OutdoorGeographyNamesSchema.Fields.RANK, sourceFeature.getLong(OsmTags.RANK));
             feat.putAttrs(OmtLanguageUtils.getNames(sourceFeature.tags(), translations));
         }
     }

@@ -12,6 +12,7 @@ import java.util.Map;
 import org.openmaptiles.Layer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.addons.LmOutdoorSchema;
+import org.openmaptiles.addons.OsmTags;
 
 public class LmLandcover implements
     Layer,
@@ -27,10 +28,8 @@ public class LmLandcover implements
 
     final String LAYER_NAME = "lm_landcover";
 
-    private final Translations translations;
-
     public LmLandcover(Translations translations, PlanetilerConfig config, Stats stats) {
-        this.translations = translations;
+
     }
 
     @Override
@@ -46,10 +45,10 @@ public class LmLandcover implements
         if (isLandtype && sourceFeature.canBePolygon()) {
             var feat = collector.polygon(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
-            feat.setMinZoom((int) sourceFeature.getLong("ne_min_zoom"));
-            feat.setMaxZoom((int) sourceFeature.getLong("ne_max_zoom"));
+            feat.setMinZoom((int) sourceFeature.getLong(OsmTags.NE_MIN_ZOOM));
+            feat.setMaxZoom((int) sourceFeature.getLong(OsmTags.NE_MAX_ZOOM));
             feat.setAttr(LmOutdoorSchema.OutdoorLmLandcoverSchema.Fields.CLASS,
-                sourceFeature.getString(LmOutdoorSchema.OutdoorLmLandcoverSchema.Fields.LANDTYPE));
+                sourceFeature.getString(OsmTags.NE_LANDTYPE));
             feat.setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS);
         }
     }
