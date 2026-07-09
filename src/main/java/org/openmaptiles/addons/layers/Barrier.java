@@ -43,7 +43,7 @@ public class Barrier implements
         }
 
         if (sourceFeature.canBeLine() || sourceFeature.canBePolygon()) {
-            var feat = collector.line(LAYER_NAME);
+            var feat = collector.anyGeometry(LAYER_NAME);
             feat.setBufferPixels(BUFFER_SIZE);
             feat.setMinZoom(DEF_MIN_ZOOM);
             feat.setAttr(LmOutdoorSchema.OutdoorBarrierSchema.Fields.CLASS, classValue);

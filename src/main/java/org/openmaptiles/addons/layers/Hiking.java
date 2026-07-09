@@ -63,6 +63,10 @@ public class Hiking implements
             feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.ONEWAY,
                 LmTransportation.getOneWay(sourceFeature.getTag(
                     OsmTags.ONEWAY)), 14);
+            feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.SAC_SCALE,
+                LmTransportation.getSacScale(sourceFeature.getTag(OsmTags.SAC_SCALE)), 12);
+            feat.setAttrWithMinzoom(LmOutdoorSchema.LmTrasportationSchema.Fields.VIA_FERRATA_SCALE,
+                sourceFeature.getString(LmOutdoorSchema.LmTrasportationSchema.Fields.VIA_FERRATA_SCALE), 14);
             feat.setAttr(Fields.ROUTE_SPEC, getRouteSpecification(sourceFeature)); // "educational" or null
 
 

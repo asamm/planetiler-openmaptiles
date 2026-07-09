@@ -28,6 +28,7 @@ public class LmOutdoorSchema {
             public static final String LAYER = "layer";
             public static final String TRAIL_VISIBILITY = "trail_visibility";
             public static final String ASSISTED_TRAIL = "assisted_trail";
+            public static final String SAC_SCALE = "sac_scale";
         }
 
         final class FieldValues {

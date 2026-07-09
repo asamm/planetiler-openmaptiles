@@ -35,6 +35,17 @@ public class LmTransportation implements Layer,
         "private", "no"
     );
 
+    /** Alternative values of the {@code bridge} tag that denote a bridge besides the generic {@code bridge=yes}. */
+    private static final Set<String> BRIDGE_TYPE_VALUES = Set.of(
+        "cantilever", "covered", "movable", "trestle", "viaduct", "boardwalk"
+    );
+
+    private static final Set<String> SAC_SCALE_VALUES = Set.of(
+        "hiking", "mountain_hiking", "demanding_mountain_hiking",
+        "alpine_hiking", "demanding_alpine_hiking", "difficult_alpine_hiking", "strolling",
+        "0","1","2","3","4","5"
+    );
+
     public static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
 
     public static final ZoomFunction.MeterToPixelThresholds MIN_LENGTH = ZoomFunction.meterThresholds()
@@ -98,6 +109,7 @@ public class LmTransportation implements Layer,
                 feat.setAttrWithMinzoom(Fields.ASSISTED_TRAIL, this.assistedTrailMapping.getOrElse(sourceFeature, null),
                     14);
                 feat.setAttrWithMinzoom(Fields.TRAIL_VISIBILITY, sourceFeature.getString(Fields.TRAIL_VISIBILITY), 14);
+                feat.setAttrWithMinzoom(Fields.SAC_SCALE, getSacScale(sourceFeature.getTag(OsmTags.SAC_SCALE)), 12);
             }
         }
 
@@ -123,8 +135,9 @@ public class LmTransportation implements Layer,
      * @return value 'bridge', 'tunnel', 'ford' or null
      */
     public static Object getBrunnel(SourceFeature feature) {
-        return Utils.brunnel(feature.getBoolean(OsmTags.BRIDGE), feature.getBoolean(OsmTags.TUNNEL), feature.getBoolean(
-            OsmTags.FORD));
+        String bridge = feature.getString(OsmTags.BRIDGE);
+        boolean isBridge = feature.getBoolean(OsmTags.BRIDGE) || (bridge != null && BRIDGE_TYPE_VALUES.contains(bridge));
+        return Utils.brunnel(isBridge, feature.getBoolean(OsmTags.TUNNEL), feature.getBoolean(OsmTags.FORD));
     }
 
     /**
@@ -132,6 +145,17 @@ public class LmTransportation implements Layer,
      */
     public static String getAccess(Object value) {
         return value == null ? null : ACCESS_NO_VALUES.contains(String.valueOf(value)) ? "no" : null;
+    }
+
+    /**
+     * Returns the {@code sac_scale} value if it is one of the known scale values, or null otherwise.
+     */
+    public static String getSacScale(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String scale = String.valueOf(value);
+        return SAC_SCALE_VALUES.contains(scale) ? scale : null;
     }
 
 
